@@ -18,13 +18,9 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const [input, setInput] = useState("");
 
   return (
     <div>
-      <div>
-        <input value={input} onChange={(e) => setInput(e.target.value)} />
-      </div>
       {navLinks.map((link) => {
         const isActive = pathname.startsWith(link.href);
 
@@ -38,7 +34,7 @@ export default function AuthLayout({
           </Link>
         );
       })}
-      {children}
+      <div className="flex justify-center m-4">{children}</div>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 
 // 싱글톤 패턴을 사용하여 PrismaClient 인스턴스 생성
-const prismaClientSingleton = () => {
+const prismaClientSingleton = (): PrismaClient => {
   return new PrismaClient();
 };
 
@@ -9,7 +9,8 @@ declare global {
   var prisma: undefined | ReturnType<typeof prismaClientSingleton>;
 }
 
-export const prisma = globalThis.prisma ?? prismaClientSingleton();
+export const prisma: PrismaClient =
+  globalThis.prisma ?? prismaClientSingleton();
 
 export default prisma;
 
