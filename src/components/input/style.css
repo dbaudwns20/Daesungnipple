@@ -2,7 +2,7 @@
   @apply relative;
   @apply w-full;
   @apply min-w-[350px];
-  @apply h-10;
+  @apply h-12;
 }
 
 .input-wrapper > .input {
@@ -108,7 +108,7 @@
 .input-wrapper > .input:placeholder-shown ~ .label {
   @apply text-gray-500;
   @apply text-sm;
-  @apply leading-[3.75];
+  @apply leading-[4.25];
 
   &::before {
     @apply border-transparent;

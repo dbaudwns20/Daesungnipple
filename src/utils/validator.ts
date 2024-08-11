@@ -3,13 +3,17 @@
  * @param form
  * @returns
  */
-export function validateForm(form: HTMLFormElement): boolean {
-  let isValid: boolean = true;
+export function validateForm(form: HTMLFormElement) {
+  let invalidField: HTMLElement | null = null;
   for (const element of Object.assign(form)) {
-    if (!element.checkValidity()) {
-      isValid = false;
-      // break 이용하면 모든 필드에 입력여부를 확인할 수 없다.
-    }
+    if (!element.checkValidity() && !invalidField)
+      invalidField = element as HTMLElement;
+    // break 를 하면 모든 필드를 체크할 수 없다.
   }
-  return isValid;
+  // 맨 첫번째 invalid field 가 있으면 focus, 에러발생
+  if (invalidField) {
+    invalidField.scrollIntoView();
+    invalidField.focus();
+    throw new Error("Form validation failed"); // 예외 발생
+  }
 }
