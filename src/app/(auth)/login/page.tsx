@@ -10,9 +10,9 @@ import { validateForm } from "@/utils/validator";
 export default function Login() {
   const usernameRef = useRef<InputType>(null);
 
-  const [username, setUsername] = useState<string>();
-  const [password, setPassword] = useState<string>();
-  const [number, setNumber] = useState<number>();
+  const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [number, setNumber] = useState<number>(0);
   const [isFetching, setIsFetching] = useState<boolean>(false);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -81,7 +81,9 @@ export default function Login() {
           }}
           labelText="숫자"
         />
-        <Button type="submit" buttonText="로그인" isFetching={isFetching} />
+        <Button type="submit" isFetching={isFetching} color="blue" size="lg">
+          로그인
+        </Button>
       </form>
     </div>
   );

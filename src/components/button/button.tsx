@@ -6,21 +6,37 @@ import {
   useEffect,
   useImperativeHandle,
   forwardRef,
+  ReactNode,
 } from "react";
+
+import {
+  ButtonVariants,
+  type ButtonColorType,
+  type ButtonSizeType,
+} from "./variants";
+import { cn } from "@/utils/cn";
 
 export type ButtonType = {
   setFocus: () => void;
 };
 
 type ButtonProps = {
+  children: ReactNode | ReactNode[] | string;
   type: "button" | "submit" | "reset";
-  buttonText: string;
   isDisabled?: boolean;
   isFetching?: boolean;
+  color?: ButtonColorType;
+  size?: ButtonSizeType;
 };
 
 const Button = forwardRef((props: ButtonProps, ref) => {
-  const { type, buttonText, isDisabled = false, isFetching = false } = props;
+  const {
+    children,
+    type,
+    isDisabled = false,
+    isFetching = false,
+    color = "default",
+  } = props;
 
   // 부모 컴포넌트에서 사용할 수 있는 함수 선언
   useImperativeHandle(ref, () => ({ setFocus }));
@@ -45,9 +61,9 @@ const Button = forwardRef((props: ButtonProps, ref) => {
 
   return (
     <button
-      id={`button_${buttonId}`}
-      aria-describedby={`button_${buttonId}`}
-      className="button"
+      id={`${type}_${buttonId}`}
+      aria-describedby={`${type}_${buttonId}`}
+      className={cn(ButtonVariants({ color: color }))}
       ref={buttonRef}
       type={type}
       disabled={isDisabled}
@@ -75,7 +91,7 @@ const Button = forwardRef((props: ButtonProps, ref) => {
           처리중...
         </>
       ) : (
-        buttonText
+        children
       )}
     </button>
   );
