@@ -8,8 +8,10 @@ import {
   InvalidEvent,
   Dispatch,
   SetStateAction,
-  useEffect,
 } from "react";
+
+import { InputVariants, LabelVariants } from "./variants";
+import { cn } from "@/utils/cn";
 
 export type InputType = {
   setFocus: () => void;
@@ -35,13 +37,6 @@ type InputProps = {
   pattern?: Pattern;
   valueRange?: [number, number];
   onChange: Dispatch<SetStateAction<any>>;
-};
-
-const InputStyles: { INVALID_INPUT: string; INVALID_LABEL: string } = {
-  INVALID_INPUT:
-    "border-red-500 border-t-transparent placeholder-shown:border-t-red-500 focus:border-red-500 focus:border-t-transparent",
-  INVALID_LABEL:
-    "text-red-500 before:border-red-500 after:border-red-500 peer-focus:text-red-500 peer-focus:before:border-red-500 peer-focus:after:border-red-500",
 };
 
 const Input = forwardRef((props: InputProps, ref) => {
@@ -150,27 +145,11 @@ const Input = forwardRef((props: InputProps, ref) => {
     }
   };
 
-  useEffect(() => {
-    if (isInvalid) {
-      labelRef.current!.className += ` ${InputStyles.INVALID_LABEL}`;
-      inputRef.current!.className += ` ${InputStyles.INVALID_INPUT}`;
-    } else {
-      labelRef.current!.className = labelRef.current!.className.replace(
-        InputStyles.INVALID_LABEL,
-        "",
-      );
-      inputRef.current!.className = inputRef.current!.className.replace(
-        InputStyles.INVALID_INPUT,
-        "",
-      );
-    }
-  }, [isInvalid]);
-
   return (
     <div className="relative h-12 w-full min-w-[350px]">
       <input
         id={`input_${inputId}`}
-        className="peer h-full w-full rounded-[7px] border border-gray-200 border-t-transparent bg-transparent px-3 py-2.5 font-sans text-sm font-normal text-gray-700 outline outline-0 transition-all placeholder-shown:border-t-gray-200 focus:border-2 focus:border-blue-500 focus:border-t-transparent focus:outline-0 disabled:cursor-not-allowed disabled:border disabled:bg-gray-50"
+        className={cn(InputVariants({ invalid: isInvalid }))}
         placeholder=" "
         ref={inputRef}
         type={inputType}
@@ -184,7 +163,7 @@ const Input = forwardRef((props: InputProps, ref) => {
       <label
         id={`input_${inputId}`}
         ref={labelRef}
-        className="before:content-[' '] after:content-[' '] pointer-events-none absolute -top-1.5 left-0 flex h-full w-full select-none !overflow-visible truncate text-[11px] font-normal leading-[1.5] text-gray-400 transition-all before:pointer-events-none before:mr-1 before:mt-[6.5px] before:box-border before:block before:h-1.5 before:w-2.5 before:rounded-tl-md before:border-l before:border-t before:border-gray-200 before:transition-all after:pointer-events-none after:ml-1 after:mt-[6.5px] after:box-border after:block after:h-1.5 after:w-2.5 after:flex-grow after:rounded-tr-md after:border-r after:border-t after:border-gray-200 after:transition-none peer-placeholder-shown:text-sm peer-placeholder-shown:leading-[4.25] peer-placeholder-shown:text-gray-500 peer-placeholder-shown:before:border-transparent peer-placeholder-shown:after:border-transparent peer-focus:text-[11px] peer-focus:leading-[1.5] peer-focus:text-blue-500 peer-focus:before:border-l-2 peer-focus:before:border-t-2 peer-focus:before:border-blue-500 peer-focus:after:border-r-2 peer-focus:after:border-t-2 peer-focus:after:border-blue-500 peer-disabled:text-gray-400/80"
+        className={cn(LabelVariants({ invalid: isInvalid }))}
       >
         {required.isRequired ? (
           <>
