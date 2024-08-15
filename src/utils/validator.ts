@@ -3,7 +3,7 @@
  * @param form
  * @returns
  */
-export function validateForm(form: HTMLFormElement) {
+export function validateForm(form: HTMLFormElement): boolean {
   let invalidField: HTMLElement | null = null;
   for (const element of Object.assign(form)) {
     if (!element.checkValidity() && !invalidField)
@@ -14,6 +14,7 @@ export function validateForm(form: HTMLFormElement) {
   if (invalidField) {
     invalidField.scrollIntoView();
     invalidField.focus();
-    throw new Error("Form validation failed"); // 예외 발생
+    return false;
   }
+  return true;
 }

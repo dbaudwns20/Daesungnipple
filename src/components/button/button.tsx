@@ -1,14 +1,12 @@
 import "./style.css";
 
 import {
+  useId,
   useRef,
-  useMemo,
   useEffect,
   useImperativeHandle,
   forwardRef,
 } from "react";
-
-import { generateRandomText } from "@/utils/common";
 
 export type ButtonType = {
   setFocus: () => void;
@@ -30,16 +28,11 @@ const Button = forwardRef((props: ButtonProps, ref) => {
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   // values
-  const buttonId = useMemo(() => `button_${generateRandomText()}`, []);
+  const buttonId: string = useId();
 
   const setFocus = () => {
     buttonRef.current!.focus();
   };
-
-  useEffect(() => {
-    // set element id
-    buttonRef.current!.setAttribute("id", buttonId);
-  }, [buttonId]);
 
   useEffect(() => {
     if (isDisabled) return;
@@ -52,6 +45,8 @@ const Button = forwardRef((props: ButtonProps, ref) => {
 
   return (
     <button
+      id={`button_${buttonId}`}
+      aria-describedby={`button_${buttonId}`}
       className="button"
       ref={buttonRef}
       type={type}
@@ -60,7 +55,7 @@ const Button = forwardRef((props: ButtonProps, ref) => {
       {isFetching ? (
         <>
           <svg
-            className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+            className="-ml-1 mr-3 h-5 w-5 animate-spin text-white"
             viewBox="0 0 24 24"
           >
             <circle
