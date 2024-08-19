@@ -36,6 +36,7 @@ type InputProps = {
   required?: Required;
   pattern?: Pattern;
   valueRange?: [number, number];
+  additionalClass?: string;
   onChange: Dispatch<SetStateAction<any>>;
 };
 
@@ -55,19 +56,23 @@ const Input = forwardRef((props: InputProps, ref) => {
       invalidMessage: "",
     },
     valueRange,
+    additionalClass = "",
     onChange,
   } = props;
 
   // 부모 컴포넌트에서 사용할 수 있는 함수 선언
   useImperativeHandle(ref, () => ({ setFocus }));
 
+  // refs
   const inputRef = useRef<HTMLInputElement>(null);
   const labelRef = useRef<HTMLLabelElement>(null);
 
+  // values
   const inputId: string = useId();
   const [isInvalid, setIsInvalid] = useState<boolean>(false);
   const [invalidMessage, setInvalidMessage] = useState<string | null>(null);
 
+  // focus
   const setFocus = () => {
     inputRef.current!.focus();
     inputRef.current!.select();
@@ -146,10 +151,10 @@ const Input = forwardRef((props: InputProps, ref) => {
   };
 
   return (
-    <div className="relative h-12 w-full min-w-[350px]">
+    <div className="relative mb-6 h-12 w-full min-w-[350px]">
       <input
         id={`input_${inputId}`}
-        className={cn(InputVariants({ invalid: isInvalid }))}
+        className={cn(InputVariants({ invalid: isInvalid }), additionalClass)}
         placeholder=" "
         ref={inputRef}
         type={inputType}
@@ -165,18 +170,18 @@ const Input = forwardRef((props: InputProps, ref) => {
         ref={labelRef}
         className={cn(LabelVariants({ invalid: isInvalid }))}
       >
+        {labelText}
         {required.isRequired ? (
-          <>
-            {labelText}
-            <span className="ml-1 text-orange-400">*</span>
-          </>
+          <span className="ml-1 text-orange-400">*</span>
         ) : (
-          labelText
+          <></>
         )}
       </label>
-      <p className="invisible ml-1 mt-1 flex items-center gap-1 text-xs text-red-500 peer-invalid:visible">
-        {invalidMessage}
-      </p>
+      {isInvalid && (
+        <p className="ml-1 mt-1 flex items-center text-xs text-red-500">
+          {invalidMessage}
+        </p>
+      )}
     </div>
   );
 });

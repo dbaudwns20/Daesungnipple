@@ -1,5 +1,3 @@
-import "./style.css";
-
 import {
   useId,
   useRef,
@@ -27,6 +25,8 @@ type ButtonProps = {
   isFetching?: boolean;
   color?: ButtonColorType;
   size?: ButtonSizeType;
+  additionalClass?: string;
+  onClick?: () => void;
 };
 
 const Button = forwardRef((props: ButtonProps, ref) => {
@@ -35,12 +35,16 @@ const Button = forwardRef((props: ButtonProps, ref) => {
     type,
     isDisabled = false,
     isFetching = false,
-    color = "default",
+    color = "black",
+    size = "md",
+    additionalClass = "",
+    onClick,
   } = props;
 
   // 부모 컴포넌트에서 사용할 수 있는 함수 선언
   useImperativeHandle(ref, () => ({ setFocus }));
 
+  // refs
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   // values
@@ -63,10 +67,14 @@ const Button = forwardRef((props: ButtonProps, ref) => {
     <button
       id={`${type}_${buttonId}`}
       aria-describedby={`${type}_${buttonId}`}
-      className={cn(ButtonVariants({ color: color }))}
+      className={cn(
+        ButtonVariants({ color: color, size: size }),
+        additionalClass,
+      )}
       ref={buttonRef}
       type={type}
       disabled={isDisabled}
+      onClick={onClick}
     >
       {isFetching ? (
         <>
