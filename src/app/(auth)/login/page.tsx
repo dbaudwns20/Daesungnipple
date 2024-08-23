@@ -18,9 +18,7 @@ export default function Login() {
     e.preventDefault();
 
     // 입력값 체크
-    if (!validateForm(e.target as HTMLFormElement)) {
-      return;
-    }
+    if (!validateForm(e.target as HTMLFormElement)) return;
 
     setIsFetching(true);
     setTimeout(() => {
