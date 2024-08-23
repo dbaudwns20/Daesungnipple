@@ -5,9 +5,11 @@ import { useState, useRef, useEffect, FormEvent } from "react";
 import Input, { type InputType } from "@/components/input/input";
 import Button, { type ButtonType } from "@/components/button/button";
 
+import { signIn } from "@/auth";
+
 import { validateForm } from "@/utils/validator";
 
-export default function Login() {
+export default function SignIn() {
   const usernameRef = useRef<InputType>(null);
 
   const [username, setUsername] = useState<string>("");
@@ -27,14 +29,18 @@ export default function Login() {
     }, 1500);
   };
 
+  const signInByOAuth = async (type: string) => {
+    await signIn(type);
+  };
+
   useEffect(() => {
     usernameRef?.current?.setFocus();
   }, []);
 
   return (
     <div className="rounded-md border border-gray-300 p-10 lg:w-1/2 xl:w-1/3">
-      <h1 className="mb-8 text-center text-2xl font-bold">로그인</h1>
-      <form className="h-full w-full" onSubmit={handleSubmit} noValidate>
+      <h1 className="text-center text-2xl font-bold">로그인</h1>
+      <form className="w-full" onSubmit={handleSubmit} noValidate>
         <Input
           ref={usernameRef}
           inputType="text"
@@ -73,6 +79,39 @@ export default function Login() {
           </Button>
         </div>
       </form>
+
+      <hr className="my-4 h-px w-full bg-gray-200" />
+
+      <div className="grid gap-2.5">
+        <Button
+          color="blue"
+          size="sm"
+          type="button"
+          additionalClass="w-full"
+          isFetching={isFetching}
+          onClick={() => signInByOAuth("google")}
+        >
+          Google 로그인
+        </Button>
+        <Button
+          color="green"
+          size="sm"
+          type="button"
+          additionalClass="w-full"
+          isFetching={isFetching}
+        >
+          네이버 로그인
+        </Button>
+        <Button
+          color="yellow"
+          size="sm"
+          type="button"
+          additionalClass="w-full"
+          isFetching={isFetching}
+        >
+          카카오 로그인
+        </Button>
+      </div>
     </div>
   );
 }

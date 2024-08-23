@@ -1,16 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import prisma from "@/utils/prisma";
+import { prisma } from "@/prisma";
 
 export async function GET(request: NextRequest) {
   const user = await prisma.user.findMany();
 
-  const res = JSON.parse(
-    JSON.stringify(
-      user,
-      (key, value) => (typeof value === "bigint" ? value.toString() : value) // return everything else unchanged
-    )
-  );
+  const res = JSON.parse(JSON.stringify(user));
 
   return NextResponse.json(res);
 }
