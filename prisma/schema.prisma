@@ -8,13 +8,12 @@ datasource db {
 }
 
 model User {
-  id            Int      @id @default(autoincrement())
-  username      String      @db.VarChar(100)
-  password      String      @db.VarChar(255)
-  name          String      @db.VarChar(100)
-  phone         String?     @db.VarChar(15)
-  mobilePhone   String?     @map("mobile_phone") @db.VarChar(15)
-  email         String?     @db.VarChar(100)
+  id            Int         @id @default(autoincrement())
+  email         String      @map("email") @db.VarChar(100)
+  password      String      @map("password") @db.VarChar(255)
+  name          String      @map("name") @db.VarChar(100)
+  mobilePhone   String      @map("mobile_phone") @db.VarChar(15)
+  phone         String?     @map("phone") @db.VarChar(15)
   zipCode       String?     @map("zip_code") @db.Char(5)
   addressBase   String?     @map("address_base") @db.VarChar(255)
   addressDetail String?     @map("address_detail") @db.VarChar(255)
@@ -23,19 +22,19 @@ model User {
   deletedAt     DateTime?   @map("deleted_at") @db.Timestamp(0)
   userToken     UserToken[]
 
+  @@unique([email, mobilePhone])
   @@map("user")
-  @@unique([username, email])
 }
 
 model UserToken {
-  id        Int   @id @default(autoincrement())
-  userId    Int   @map("user_id")
-  token     String   @db.VarChar(255)
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  token     String   @map("token") @db.VarChar(255)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
   expiredAt DateTime @map("expired_at") @db.Timestamp(0)
   user      User     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_USER_TO_USER_TOKEN_1")
 
+  @@unique([token])
   @@index([userId], map: "FK_USER_TO_USER_TOKEN_1")
   @@map("user_token")
-  @@unique([token])
 }
