@@ -1,3 +1,11 @@
+export const PASSWORD_RULE: RegExp = new RegExp(
+  /^(?=.*[a-zA-Z])(?=.*[!"#$%&'()*+,\-.\/:;`₩\\<=>?@\[\]^_{|}~])(?=.*[0-9]).{8,20}$/,
+);
+export const EMAIL_RULE: RegExp = new RegExp(
+  /^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$/,
+);
+export const PHONE_RULE: RegExp = new RegExp(/^\d{2,3}\d{3,4}\d{4}$/);
+
 /**
  * form 데이터 validate 체크
  * @param form

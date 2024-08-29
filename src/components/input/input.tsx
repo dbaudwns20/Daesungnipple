@@ -28,7 +28,7 @@ type Pattern = {
 };
 
 type InputProps = {
-  inputType: "text" | "password" | "number";
+  inputType: "text" | "password" | "number" | "email";
   inputValue: any;
   labelText: string;
   isDisabled?: boolean;
@@ -37,7 +37,7 @@ type InputProps = {
   pattern?: Pattern;
   valueRange?: [number, number];
   additionalClass?: string;
-  onChange: Dispatch<SetStateAction<any>>;
+  onChange: Dispatch<SetStateAction<string>> | Dispatch<SetStateAction<number>>;
 };
 
 const Input = forwardRef((props: InputProps, ref) => {
@@ -76,7 +76,6 @@ const Input = forwardRef((props: InputProps, ref) => {
   const setFocus = () => {
     inputRef.current!.focus();
     inputRef.current!.select();
-    inputRef.current!.setSelectionRange(0, 999); // For mobile devices.
   };
 
   // 커스텀규칙 정의
@@ -151,37 +150,39 @@ const Input = forwardRef((props: InputProps, ref) => {
   };
 
   return (
-    <div className="relative mb-6 h-12 w-full min-w-[350px]">
-      <input
-        id={`input_${inputId}`}
-        className={cn(InputVariants({ invalid: isInvalid }), additionalClass)}
-        placeholder=" "
-        ref={inputRef}
-        type={inputType}
-        value={inputValue}
-        readOnly={isReadOnly}
-        disabled={isDisabled}
-        onInvalid={handleInvalid}
-        required={required.isRequired}
-        onChange={(e) => handleChange(e)}
-      />
-      <label
-        id={`input_${inputId}`}
-        ref={labelRef}
-        className={cn(LabelVariants({ invalid: isInvalid }))}
+    <div className={`block ${!isInvalid ? "mb-3" : "mb-1.5"}`}>
+      <div className="relative h-12 w-full min-w-[350px]">
+        <input
+          id={`input_${inputId}`}
+          className={cn(InputVariants({ invalid: isInvalid }), additionalClass)}
+          placeholder=" "
+          ref={inputRef}
+          type={inputType}
+          value={inputValue}
+          readOnly={isReadOnly}
+          disabled={isDisabled}
+          onInvalid={handleInvalid}
+          required={required.isRequired}
+          onChange={(e) => handleChange(e)}
+        />
+        <label
+          id={`input_${inputId}`}
+          ref={labelRef}
+          className={cn(LabelVariants({ invalid: isInvalid }))}
+        >
+          {labelText}
+          {required.isRequired ? (
+            <span className="ml-1 text-orange-400">*</span>
+          ) : (
+            <></>
+          )}
+        </label>
+      </div>
+      <p
+        className={`ml-1.5 mt-1 flex items-center text-xs text-red-500 duration-200 ${isInvalid ? "opacity-100" : "opacity-0"}`}
       >
-        {labelText}
-        {required.isRequired ? (
-          <span className="ml-1 text-orange-400">*</span>
-        ) : (
-          <></>
-        )}
-      </label>
-      {isInvalid && (
-        <p className="ml-1 mt-1 flex items-center text-xs text-red-500">
-          {invalidMessage}
-        </p>
-      )}
+        {invalidMessage}
+      </p>
     </div>
   );
 });
