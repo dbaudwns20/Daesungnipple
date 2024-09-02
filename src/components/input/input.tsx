@@ -151,7 +151,7 @@ const Input = forwardRef((props: InputProps, ref) => {
 
   return (
     <div className={`block ${!isInvalid ? "mb-3" : "mb-1.5"}`}>
-      <div className="relative h-12 w-full min-w-[350px]">
+      <div className="relative h-12 w-full">
         <input
           id={`input_${inputId}`}
           className={cn(InputVariants({ invalid: isInvalid }), additionalClass)}
