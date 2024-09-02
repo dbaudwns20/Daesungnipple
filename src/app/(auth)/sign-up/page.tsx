@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useRef, useEffect, FormEvent } from "react";
+import { useSearchParams } from "next/navigation";
 
 import Input, { type InputType } from "@/components/input/input";
 import Button, { type ButtonType } from "@/components/button/button";
+import OAuthProviders from "@/components/oauth-providers/oauth.providers";
 
 import {
   validateForm,
@@ -13,13 +15,19 @@ import {
 } from "@/utils/validator";
 
 export default function SignUp() {
-  const emailRef = useRef<InputType>(null);
+  const searchParams = useSearchParams();
 
-  const [email, setEmail] = useState<string>("");
+  const emailRef = useRef<InputType>(null);
+  const passwordRef = useRef<InputType>(null);
+
+  const [email, setEmail] = useState<string>(searchParams.get("email") ?? "");
   const [password, setPassword] = useState<string>("");
   const [passwordCheck, setPasswordCheck] = useState<string>("");
-  const [name, setName] = useState<string>("");
+  const [name, setName] = useState<string>(searchParams.get("name") ?? "");
   const [mobilePhone, setMobilePhone] = useState<string>("");
+
+  const provider: string = searchParams.get("provider") ?? "";
+  const isOAuthSignUp: boolean = !!provider;
 
   const [isFetching, setIsFetching] = useState<boolean>(false);
 
@@ -34,27 +42,32 @@ export default function SignUp() {
     const res = await fetch("/api/auth/sign-up", {
       headers: { "Content-Type": "application/json" },
       method: "POST",
-      body: JSON.stringify({ email, password, name, mobilePhone }),
+      body: JSON.stringify({ email, password, name, mobilePhone, provider }),
     });
 
-    console.log(res);
-
     setIsFetching(false);
+
+    if (res.ok) {
+    } else {
+      // error handling
+    }
   };
 
   useEffect(() => {
-    emailRef?.current?.setFocus();
-  }, []);
+    if (!isOAuthSignUp) emailRef?.current?.setFocus();
+    else passwordRef?.current?.setFocus();
+  }, [isOAuthSignUp]);
 
   return (
-    <div className="rounded-md border border-gray-300 p-10 lg:w-1/2 xl:w-1/3">
-      <h1 className="text-center text-2xl font-bold">회원가입</h1>
+    <div className="rounded-lg p-12 sm:w-full md:w-1/2 lg:w-1/3">
+      <h1 className="mb-7 text-center text-2xl font-bold">회원가입</h1>
       <form className="w-full" onSubmit={handleSubmit} noValidate>
         <Input
           ref={emailRef}
           inputType="email"
           inputValue={email}
           onChange={setEmail}
+          isDisabled={isOAuthSignUp}
           required={{
             isRequired: true,
             invalidMessage: "이메일을 입력해주세요",
@@ -66,6 +79,7 @@ export default function SignUp() {
           labelText="이메일"
         />
         <Input
+          ref={passwordRef}
           inputType="password"
           inputValue={password}
           onChange={setPassword}
@@ -99,6 +113,7 @@ export default function SignUp() {
           inputValue={name}
           onChange={setName}
           labelText="이름"
+          isDisabled={isOAuthSignUp}
           required={{
             isRequired: true,
             invalidMessage: "이름을 입력해주세요",
@@ -122,38 +137,6 @@ export default function SignUp() {
           회원가입
         </Button>
       </form>
-
-      <hr className="my-4 h-px w-full bg-gray-200" />
-
-      <div className="grid gap-3">
-        <Button
-          color="blue"
-          size="sm"
-          type="button"
-          additionalClass="w-full"
-          isFetching={isFetching}
-        >
-          Google 로그인
-        </Button>
-        <Button
-          color="green"
-          size="sm"
-          type="button"
-          additionalClass="w-full"
-          isFetching={isFetching}
-        >
-          네이버 로그인
-        </Button>
-        <Button
-          color="yellow"
-          size="sm"
-          type="button"
-          additionalClass="w-full"
-          isFetching={isFetching}
-        >
-          카카오 로그인
-        </Button>
-      </div>
     </div>
   );
 }
