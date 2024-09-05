@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect, FormEvent } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useRef, useEffect, useTransition, FormEvent } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 
 import Input, { type InputType } from "@/components/input/input";
 import Button, { type ButtonType } from "@/components/button/button";
-import OAuthProviders from "@/components/oauth-providers/oauth.providers";
+
+import { SignUpAction } from "@/actions/auth.actions";
 
 import {
   validateForm,
@@ -16,6 +17,7 @@ import {
 
 export default function SignUp() {
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const emailRef = useRef<InputType>(null);
   const passwordRef = useRef<InputType>(null);
@@ -29,7 +31,7 @@ export default function SignUp() {
   const provider: string = searchParams.get("provider") ?? "";
   const isOAuthSignUp: boolean = !!provider;
 
-  const [isFetching, setIsFetching] = useState<boolean>(false);
+  const [isFetching, startTransition] = useTransition();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -37,20 +39,21 @@ export default function SignUp() {
     // 입력값 체크
     if (!validateForm(e.target as HTMLFormElement)) return;
 
-    setIsFetching(true);
+    const formData: FormData = new FormData();
+    formData.append("email", email);
+    formData.append("password", password);
+    formData.append("name", name);
+    formData.append("mobilePhone", mobilePhone);
+    if (provider) formData.append("provider", provider);
 
-    const res = await fetch("/api/auth/sign-up", {
-      headers: { "Content-Type": "application/json" },
-      method: "POST",
-      body: JSON.stringify({ email, password, name, mobilePhone, provider }),
+    startTransition(async () => {
+      const res = await SignUpAction(formData);
+      if (res.ok) {
+        router.replace("/sign-in");
+      } else {
+        alert(res.message);
+      }
     });
-
-    setIsFetching(false);
-
-    if (res.ok) {
-    } else {
-      // error handling
-    }
   };
 
   useEffect(() => {

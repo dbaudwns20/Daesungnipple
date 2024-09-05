@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect, FormEvent } from "react";
+import { useState, useRef, useEffect, useTransition, FormEvent } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import Input, { type InputType } from "@/components/input/input";
 import Button, { type ButtonType } from "@/components/button/button";
@@ -12,11 +13,13 @@ import { SignInAction } from "@/actions/auth.actions";
 import { validateForm } from "@/utils/validator";
 
 export default function SignIn() {
+  const router = useRouter();
+
   const emailRef = useRef<InputType>(null);
 
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [isFetching, setIsFetching] = useState<boolean>(false);
+  const [isFetching, startTransition] = useTransition();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -24,14 +27,14 @@ export default function SignIn() {
     // 입력값 체크
     if (!validateForm(e.target as HTMLFormElement)) return;
 
-    try {
-      setIsFetching(true);
-      await SignInAction({ email, password, type: "credentials" });
-    } catch (e: any) {
-      console.log(e.message);
-    } finally {
-      setIsFetching(false);
-    }
+    startTransition(async () => {
+      const res = await SignInAction({ email, password });
+      if (res.ok) {
+        router.replace("/");
+      } else {
+        alert(res.message);
+      }
+    });
   };
 
   useEffect(() => {

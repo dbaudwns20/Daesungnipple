@@ -1,4 +1,6 @@
-import { SignInAction } from "@/actions/auth.actions";
+import { useTransition } from "react";
+
+import { SignInByOAuthAction } from "@/actions/auth.actions";
 
 import Button, { type ButtonType } from "@/components/button/button";
 
@@ -7,12 +9,12 @@ import Kakao from "@/assets/kakao.svg";
 import Naver from "@/assets/naver.svg";
 
 export default function OAuthProviders() {
-  const signInByOAuth = async (type: string) => {
-    try {
-      await SignInAction({ type });
-    } catch (e: any) {
-      console.log(e.message);
-    }
+  const [isFetching, startTransition] = useTransition();
+
+  const signInByOAuth = (type: string) => {
+    startTransition(async () => {
+      await SignInByOAuthAction({ type });
+    });
   };
 
   return (
@@ -20,6 +22,7 @@ export default function OAuthProviders() {
       <Button
         size="sm"
         type="button"
+        isDisabled={isFetching}
         additionalClass="w-full relative bg-white focus:outline-gray-200"
         onClick={() => signInByOAuth("google")}
       >
@@ -31,6 +34,7 @@ export default function OAuthProviders() {
       <Button
         size="sm"
         type="button"
+        isDisabled={isFetching}
         additionalClass="w-full relative bg-[#03c75a] focus:outline-[#03c75a]/50"
         onClick={() => signInByOAuth("naver")}
       >
@@ -42,6 +46,7 @@ export default function OAuthProviders() {
       <Button
         size="sm"
         type="button"
+        isDisabled={isFetching}
         additionalClass="w-full relative bg-[#FEE500] focus:outline-[#FEE500]/50"
         onClick={() => signInByOAuth("kakao")}
       >

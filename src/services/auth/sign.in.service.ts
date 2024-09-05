@@ -1,5 +1,4 @@
 import { prisma } from "@/prisma";
-import { AccessDenied } from "@auth/core/errors";
 
 import { EMAIL_RULE, PASSWORD_RULE } from "@/utils/validator";
 import { comparePassword } from "@/utils/password";
@@ -15,6 +14,13 @@ const INVALID_PASSWORD_MESSAGE: string =
 const SIGN_IN_MESSAGE: string = "이메일 또는 비밀번호가 일치하지 않습니다";
 
 /**
+ * 로그인 기록 생성
+ */
+async function generateLoginAccessLog() {
+  // TODO
+}
+
+/**
  * 로그인 이용자 확인
  * @param params
  * @returns
@@ -22,9 +28,8 @@ const SIGN_IN_MESSAGE: string = "이메일 또는 비밀번호가 일치하지 �
 export async function getAuthUser(params: SignInRequest) {
   const { email, password } = params;
 
-  if (!EMAIL_RULE.test(email)) throw new AccessDenied(INVALID_EMAIL_MESSAGE);
-  if (!PASSWORD_RULE.test(password))
-    throw new AccessDenied(INVALID_PASSWORD_MESSAGE);
+  if (!EMAIL_RULE.test(email)) throw new Error(INVALID_EMAIL_MESSAGE);
+  if (!PASSWORD_RULE.test(password)) throw new Error(INVALID_PASSWORD_MESSAGE);
 
   let user: any = await prisma.user.findFirst({
     where: {
@@ -32,10 +37,14 @@ export async function getAuthUser(params: SignInRequest) {
     },
   });
 
-  // 사용자가 없다면
-  if (!user) throw new AccessDenied(SIGN_IN_MESSAGE);
+  // 사용자가 없거나 비밀번호가 일치하지 않으면
+  if (!user || !comparePassword(password, user.password))
+    throw new Error(SIGN_IN_MESSAGE);
 
-  return comparePassword(password, user.password) ? user : null;
+  // password 제거
+  delete user.password;
+
+  return user;
 }
 
 /**

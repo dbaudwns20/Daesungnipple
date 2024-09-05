@@ -4,19 +4,12 @@ import { Provider } from "@/types/provider";
 import { encryptPassword } from "@/utils/password";
 import { EMAIL_RULE, PHONE_RULE } from "@/utils/validator";
 
-type RequestBody = {
-  name: string;
-  email: string;
-  password: string;
-  mobilePhone: string;
-  provider?: Provider;
-};
-
 /**
  * 동일 이메일 체크 및 형식 확인
  * @param email
  */
-async function checkEmail(email: string) {
+async function checkEmail(email: string | null) {
+  if (!email) throw new Error("이메일이 존재하지 않습니다.");
   if (!EMAIL_RULE.test(email))
     throw new Error("올바른 이메일 형식이 아닙니다.");
   const sameEmailCnt: number = await prisma.user.count({ where: { email } });
@@ -27,7 +20,8 @@ async function checkEmail(email: string) {
  * 동일 전화번호 체크 및 형식 확인
  * @param mobilePhone
  */
-async function checkMobilePhone(mobilePhone: string) {
+async function checkMobilePhone(mobilePhone: string | null) {
+  if (!mobilePhone) throw new Error("전화번호가 존재하지 않습니다.");
   if (!PHONE_RULE.test(mobilePhone))
     throw new Error("올바른 전화번호 형식이 아닙니다.");
   const sameMobilePhoneCnt: number = await prisma.user.count({
@@ -40,12 +34,16 @@ async function checkMobilePhone(mobilePhone: string) {
  * 유저 생성
  * @param body
  */
-export async function createUser(body: RequestBody) {
+export async function createUser(formData: FormData) {
   try {
-    await checkEmail(body.email);
-    await checkMobilePhone(body.mobilePhone);
+    await checkEmail(formData.get("email") as string);
+    await checkMobilePhone(formData.get("mobilePhone") as string);
 
-    const { name, email, password, mobilePhone, provider = "" } = body;
+    const name = formData.get("name") as string;
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const mobilePhone = formData.get("mobilePhone") as string;
+    const provider = (formData.get("provider") as string) ?? "";
 
     // 트랜잭션을 사용하여 데이터베이스 작업을 묶음 처리
     await prisma.$transaction(async (prisma) => {
@@ -61,7 +59,8 @@ export async function createUser(body: RequestBody) {
 
       // 2. 계정 연동이 있으면 accountProvider 테이블에 기록
       if (provider) {
-        const currentProvider: Provider = Provider[provider];
+        const currentProvider: Provider =
+          Provider[provider as keyof typeof Provider];
 
         if (!currentProvider) throw new Error("유효하지 않은 계정 연동입니다.");
 

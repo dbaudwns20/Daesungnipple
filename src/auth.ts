@@ -14,11 +14,10 @@ const providers: Provider[] = [
       password: { label: "Password", type: "password" },
     },
     authorize: async (credentials) => {
-      let user: any = await getAuthUser({
+      return await getAuthUser({
         email: credentials.email as string,
         password: credentials.password as string,
       });
-      return user;
     },
   }),
   Google,
