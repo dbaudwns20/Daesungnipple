@@ -70,12 +70,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: providers,
   callbacks: {
     async signIn({ user, account, profile }) {
-      const { email, name } = user;
-      const provider: string = account!.provider;
       // 가입된 이용자가 아니라면 회원가입 페이지로 이동시킨다
       if (await checkUserExist(user.email!)) {
+        const { email, name, image } = user;
+        const provider: string = account!.provider;
         return encodeURI(
-          `/sign-up?email=${email}&name=${name}&provider=${provider.toUpperCase()}`,
+          `/sign-up?email=${email}&name=${name}&image=${image}&provider=${provider.toUpperCase()}`,
         );
       }
       return true;

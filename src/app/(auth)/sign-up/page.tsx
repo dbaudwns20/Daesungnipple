@@ -20,14 +20,14 @@ export default function SignUp() {
   const router = useRouter();
 
   const emailRef = useRef<InputType>(null);
-  const passwordRef = useRef<InputType>(null);
+  const nameRef = useRef<InputType>(null);
 
   const [email, setEmail] = useState<string>(searchParams.get("email") ?? "");
   const [password, setPassword] = useState<string>("");
   const [passwordCheck, setPasswordCheck] = useState<string>("");
   const [name, setName] = useState<string>(searchParams.get("name") ?? "");
   const [mobilePhone, setMobilePhone] = useState<string>("");
-
+  const image: string = searchParams.get("image") ?? "";
   const provider: string = searchParams.get("provider") ?? "";
   const isOAuthSignUp: boolean = !!provider;
 
@@ -41,10 +41,13 @@ export default function SignUp() {
 
     const formData: FormData = new FormData();
     formData.append("email", email);
-    formData.append("password", password);
     formData.append("name", name);
     formData.append("mobilePhone", mobilePhone);
-    if (provider) formData.append("provider", provider);
+
+    if (provider) {
+      formData.append("image", image);
+      formData.append("provider", provider);
+    } else formData.append("password", password);
 
     startTransition(async () => {
       const res = await SignUpAction(formData);
@@ -58,7 +61,7 @@ export default function SignUp() {
 
   useEffect(() => {
     if (!isOAuthSignUp) emailRef?.current?.setFocus();
-    else passwordRef?.current?.setFocus();
+    else nameRef?.current?.setFocus();
   }, [isOAuthSignUp]);
 
   return (
@@ -81,42 +84,47 @@ export default function SignUp() {
           }}
           labelText="이메일"
         />
+        {provider === "" ? (
+          <>
+            <Input
+              inputType="password"
+              inputValue={password}
+              onChange={setPassword}
+              labelText="비밀번호"
+              required={{
+                isRequired: true,
+                invalidMessage: "비밀번호를 입력해주세요",
+              }}
+              pattern={{
+                regExp: PASSWORD_RULE,
+                invalidMessage:
+                  "영문자, 숫자, 특수문자를 포함 최소 8~20자로 입력해주세요",
+              }}
+            />
+            <Input
+              inputType="password"
+              inputValue={passwordCheck}
+              onChange={setPasswordCheck}
+              labelText="비밀번호확인"
+              required={{
+                isRequired: true,
+                invalidMessage: "비밀번호확인을 입력해주세요",
+              }}
+              pattern={{
+                regExp: new RegExp(password),
+                invalidMessage: "비밀번호가 일치하지 않습니다",
+              }}
+            />
+          </>
+        ) : (
+          <></>
+        )}
         <Input
-          ref={passwordRef}
-          inputType="password"
-          inputValue={password}
-          onChange={setPassword}
-          labelText="비밀번호"
-          required={{
-            isRequired: true,
-            invalidMessage: "비밀번호를 입력해주세요",
-          }}
-          pattern={{
-            regExp: PASSWORD_RULE,
-            invalidMessage:
-              "영문자, 숫자, 특수문자를 포함 최소 8~20자로 입력해주세요",
-          }}
-        />
-        <Input
-          inputType="password"
-          inputValue={passwordCheck}
-          onChange={setPasswordCheck}
-          labelText="비밀번호확인"
-          required={{
-            isRequired: true,
-            invalidMessage: "비밀번호확인을 입력해주세요",
-          }}
-          pattern={{
-            regExp: new RegExp(password),
-            invalidMessage: "비밀번호가 일치하지 않습니다",
-          }}
-        />
-        <Input
+          ref={nameRef}
           inputType="text"
           inputValue={name}
           onChange={setName}
           labelText="이름"
-          isDisabled={isOAuthSignUp}
           required={{
             isRequired: true,
             invalidMessage: "이름을 입력해주세요",

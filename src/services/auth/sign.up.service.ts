@@ -2,6 +2,7 @@ import { prisma } from "@/prisma";
 import { Provider } from "@/types/provider";
 
 import { encryptPassword } from "@/utils/password";
+import { generateRandomText } from "@/utils/common";
 import { EMAIL_RULE, PHONE_RULE } from "@/utils/validator";
 
 /**
@@ -39,11 +40,14 @@ export async function createUser(formData: FormData) {
     await checkEmail(formData.get("email") as string);
     await checkMobilePhone(formData.get("mobilePhone") as string);
 
-    const name = formData.get("name") as string;
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-    const mobilePhone = formData.get("mobilePhone") as string;
-    const provider = (formData.get("provider") as string) ?? "";
+    const name: string = formData.get("name") as string;
+    const email: string = formData.get("email") as string;
+    const password: string =
+      (formData.get("password") as string) ?? generateRandomText();
+    const mobilePhone: string = formData.get("mobilePhone") as string;
+    const image: string | null = (formData.get("image") as string) ?? null;
+    const provider: string | null =
+      (formData.get("provider") as string) ?? null;
 
     // 트랜잭션을 사용하여 데이터베이스 작업을 묶음 처리
     await prisma.$transaction(async (prisma) => {
@@ -54,6 +58,7 @@ export async function createUser(formData: FormData) {
           email,
           password: encryptPassword(password),
           mobilePhone,
+          image,
         },
       });
 
