@@ -26,7 +26,7 @@ type ButtonProps = {
   color?: ButtonColorType;
   size?: ButtonSizeType;
   additionalClass?: string;
-  onClick?: () => void;
+  onClick?: (...arg: any) => void | Promise<void>;
 };
 
 const Button = forwardRef((props: ButtonProps, ref) => {

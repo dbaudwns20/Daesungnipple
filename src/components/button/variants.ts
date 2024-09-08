@@ -1,6 +1,12 @@
 import { cva } from "class-variance-authority";
 
-export type ButtonColorType = "black" | "red" | "blue" | "green" | "yellow";
+export type ButtonColorType =
+  | "black"
+  | "red"
+  | "blue"
+  | "green"
+  | "yellow"
+  | "white";
 
 export type ButtonSizeType = "xs" | "sm" | "md" | "lg" | "xl";
 
@@ -32,6 +38,7 @@ export const ButtonVariants = cva(
         red: "bg-red-500 focus:outline-red-300",
         green: "bg-green-500 focus:outline-green-200",
         yellow: "bg-yellow-400 focus:outline-yellow-300",
+        white: "bg-white text-gray-900 focus:outline-gray-200",
       },
       size: {
         xs: "h-8 px-2 py-1 text-xs",

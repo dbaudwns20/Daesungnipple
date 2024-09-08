@@ -1,40 +1,27 @@
-"use client";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 
-import "./styles.css";
-import Link from "next/link";
+import "../globals.css";
 
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+const inter = Inter({ subsets: ["latin"] });
 
-const navLinks = [
-  { name: "Register", href: "/register" },
-  { name: "Login", href: "/login" },
-  { name: "Forgot Password", href: "/forgot-password" },
-];
+export const metadata: Metadata = {
+  title: "대성닛블",
+  description: "대성닛블 로그인 · 회원가입 · 비밀번호 찾기 페이지.",
+};
 
 export default function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
-
   return (
-    <div>
-      {navLinks.map((link) => {
-        const isActive = pathname.startsWith(link.href);
-
-        return (
-          <Link
-            className={isActive ? "font-bold mr-4" : "text-blue-500 mr-4"}
-            href={link.href}
-            key={link.name}
-          >
-            {link.name}
-          </Link>
-        );
-      })}
-      <div className="flex justify-center m-4">{children}</div>
-    </div>
+    <html lang="ko">
+      <body className={inter.className} style={{ height: "100vh" }}>
+        <main className="flex h-full w-full items-center justify-center">
+          {children}
+        </main>
+      </body>
+    </html>
   );
 }
