@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0.39
+    hostname: mysql-server
+    restart: always
+    ports:
+      - "3305:3306"
+    volumes:
+      - ./env/mysql/data:/var/lib/mysql # 컨테이너가 죽었을 때도 데이터가 유지되기를 원하는 경우, 볼륨 마운트를 원하지 않는 경우 주석처리
+      - ./env/mysql/conf.d/:/etc/mysql/conf.d/
+      - ./env/mysql/initdb.d:/docker-entrypoint-initdb.d # 처음에 실행할 sql 파일이 있다면 initdb.d 폴더에 넣어주면 됨(ex. init.sql)
+    env_file: ./env/mysql/.env
