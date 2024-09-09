@@ -12,19 +12,19 @@ type MessageType = "toast";
 function removeExistingMessage(messageType: MessageType) {
   Array.from(messageMap.keys()).forEach((key) => {
     if (key.startsWith(messageType)) {
-      clearMessageBox(key);
+      clearMessage(key);
     }
   });
 }
 
-function setMessageBox(messageRootId: string): HTMLDivElement {
+function setMessage(messageRootId: string): HTMLDivElement {
   const messageBox: HTMLDivElement = document.createElement("div");
   messageBox.setAttribute("id", messageRootId);
-  document.getElementById("message-box")!.appendChild(messageBox);
+  document.getElementById("message-wrapper")!.appendChild(messageBox);
   return messageBox;
 }
 
-export function clearMessageBox(messageRootId: string) {
+export function clearMessage(messageRootId: string) {
   const messageRoot: Root | undefined = messageMap.get(messageRootId);
   if (messageRoot) {
     // 해당 메시지 루트 언마운트
@@ -47,7 +47,7 @@ export function showToast(options: ToastOptions) {
   // id
   const messageRootId: string = `toast_${generateRandomText()}`;
   // root 생성
-  const root: Root = createRoot(setMessageBox(messageRootId));
+  const root: Root = createRoot(setMessage(messageRootId));
   // 컴포넌트 렌더링
   root.render(
     createElement(Toast, {

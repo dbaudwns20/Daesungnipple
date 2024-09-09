@@ -8,3 +8,7 @@ body {
   padding: 0;
   @apply dark:bg-gray-800;
 }
+
+#message-wrapper {
+  position: relative;
+}
