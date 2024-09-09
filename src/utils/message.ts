@@ -17,22 +17,19 @@ function removeExistingMessage(messageType: MessageType) {
   });
 }
 
-function setMessage(messageRootId: string): HTMLDivElement {
-  const messageBox: HTMLDivElement = document.createElement("div");
-  messageBox.setAttribute("id", messageRootId);
-  document.getElementById("message-wrapper")!.appendChild(messageBox);
-  return messageBox;
+function setMessage(): HTMLDivElement {
+  return document.getElementById("message-wrapper")! as HTMLDivElement;
 }
 
-export function clearMessage(messageRootId: string) {
-  const messageRoot: Root | undefined = messageMap.get(messageRootId);
+export function clearMessage(messageId: string) {
+  const messageRoot: Root | undefined = messageMap.get(messageId);
   if (messageRoot) {
     // 해당 메시지 루트 언마운트
     messageRoot.unmount();
     // 메시지 id 로 생성된 div 삭제
-    document.getElementById(messageRootId)?.remove();
+    document.getElementById(messageId)?.remove();
     // Map 에서 삭제
-    messageMap.delete(messageRootId);
+    messageMap.delete(messageId);
   }
 }
 
@@ -45,16 +42,16 @@ export function showToast(options: ToastOptions) {
   // 같은 유형의 메시지가 있다면 제거
   removeExistingMessage("toast");
   // id
-  const messageRootId: string = `toast_${generateRandomText()}`;
+  const messageId: string = `toast_${generateRandomText()}`;
   // root 생성
-  const root: Root = createRoot(setMessage(messageRootId));
+  const root: Root = createRoot(setMessage());
   // 컴포넌트 렌더링
   root.render(
     createElement(Toast, {
       ...options,
-      ...{ messageRootId },
+      ...{ messageId },
     }),
   );
   // Map 에 저장
-  messageMap.set(messageRootId, root);
+  messageMap.set(messageId, root);
 }

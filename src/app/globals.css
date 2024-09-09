@@ -10,5 +10,8 @@ body {
 }
 
 #message-wrapper {
-  position: relative;
+  position: fixed;
+  z-index: 40;
+  inset: 0;
+  pointer-events: none;
 }
