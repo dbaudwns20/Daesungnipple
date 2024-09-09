@@ -21,6 +21,7 @@ export default function AuthLayout({
         <main className="flex h-full w-full items-center justify-center">
           {children}
         </main>
+        <div id="message-wrapper"></div>
       </body>
     </html>
   );
