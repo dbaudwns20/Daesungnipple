@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect, useTransition, FormEvent } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import Input, { type InputType } from "@/components/input/input";
 import Button, { type ButtonType } from "@/components/button/button";
@@ -25,19 +25,14 @@ export default function SignIn() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    showToast({ message: "처리되었습니다" });
+    // 입력값 체크
+    if (!validateForm(e.target as HTMLFormElement)) return;
 
-    // // 입력값 체크
-    // if (!validateForm(e.target as HTMLFormElement)) return;
-
-    // startTransition(async () => {
-    //   const res = await SignInAction({ email, password });
-    //   if (res.ok) {
-    //     router.replace("/");
-    //   } else {
-    //     alert(res.message);
-    //   }
-    // });
+    startTransition(async () => {
+      const res = await SignInAction({ email, password });
+      showToast({ message: res.message });
+      if (res.ok) router.replace("/");
+    });
   };
 
   useEffect(() => {

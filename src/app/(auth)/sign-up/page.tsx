@@ -8,6 +8,8 @@ import Button, { type ButtonType } from "@/components/button/button";
 
 import { SignUpAction } from "@/actions/auth.actions";
 
+import { showToast } from "@/utils/message";
+
 import {
   validateForm,
   EMAIL_RULE,
@@ -51,11 +53,8 @@ export default function SignUp() {
 
     startTransition(async () => {
       const res = await SignUpAction(formData);
-      if (res.ok) {
-        router.replace("/sign-in");
-      } else {
-        alert(res.message);
-      }
+      showToast({ message: res.message });
+      if (res.ok) router.replace("/sign-in");
     });
   };
 

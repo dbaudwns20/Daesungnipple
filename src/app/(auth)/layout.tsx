@@ -1,9 +1,4 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-
-import "../globals.css";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "대성닛블",
@@ -16,13 +11,8 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ko">
-      <body className={inter.className} style={{ height: "100vh" }}>
-        <main className="flex h-full w-full items-center justify-center">
-          {children}
-        </main>
-        <div id="message-wrapper"></div>
-      </body>
-    </html>
+    <main className="flex h-[100vh] w-full items-center justify-center">
+      {children}
+    </main>
   );
 }
