@@ -18,7 +18,7 @@ type SignInParams = {
 };
 
 export async function SignInAction(params: SignInParams) {
-  let { ok, message } = { ok: true, message: "로그인되었습니다." };
+  let { ok, message } = { ok: true, message: "로그인되었습니다" };
   try {
     const { email, password } = params;
     await signIn("credentials", { email, password, redirect: false });
@@ -41,7 +41,7 @@ export async function SignInByOAuthAction(params: SignInParams) {
 }
 
 export async function SignUpAction(formData: FormData) {
-  let { ok, message } = { ok: true, message: "회원가입이 완료되었습니다." };
+  let { ok, message } = { ok: true, message: "회원가입되었습니다" };
   try {
     await createUser(formData);
   } catch (e: any) {
