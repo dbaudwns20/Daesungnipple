@@ -28,6 +28,7 @@ export default async function RootLayout({
           {children}
           <Footer />
         </SessionProvider>
+        <div id="message-wrapper"></div>
       </body>
     </html>
   );

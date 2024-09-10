@@ -11,6 +11,7 @@ import OAuthProviders from "@/components/oauth-providers/oauth.providers";
 import { SignInAction } from "@/actions/auth.actions";
 
 import { validateForm } from "@/utils/validator";
+import { showToast } from "@/utils/message";
 
 export default function SignIn() {
   const router = useRouter();
@@ -24,17 +25,19 @@ export default function SignIn() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // 입력값 체크
-    if (!validateForm(e.target as HTMLFormElement)) return;
+    showToast({ message: "처리되었습니다" });
 
-    startTransition(async () => {
-      const res = await SignInAction({ email, password });
-      if (res.ok) {
-        router.replace("/");
-      } else {
-        alert(res.message);
-      }
-    });
+    // // 입력값 체크
+    // if (!validateForm(e.target as HTMLFormElement)) return;
+
+    // startTransition(async () => {
+    //   const res = await SignInAction({ email, password });
+    //   if (res.ok) {
+    //     router.replace("/");
+    //   } else {
+    //     alert(res.message);
+    //   }
+    // });
   };
 
   useEffect(() => {
