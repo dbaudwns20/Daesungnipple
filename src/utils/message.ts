@@ -4,6 +4,10 @@ import { Root, createRoot } from "react-dom/client";
 import Toast from "@/components/messages/toast/toast";
 
 import { generateRandomText } from "@/utils/common";
+import {
+  ToastColorType,
+  ToastSizeType,
+} from "@/components/messages/toast/variants";
 
 const messageMap: Map<string, Root> = new Map<string, Root>();
 
@@ -36,6 +40,8 @@ export function clearMessage(messageId: string) {
 type ToastOptions = {
   message: string;
   duration?: number;
+  color?: ToastColorType;
+  size?: ToastSizeType;
 };
 
 export function showToast(options: ToastOptions) {
