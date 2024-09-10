@@ -4,14 +4,23 @@ import { useState, useRef, useEffect, useCallback } from "react";
 
 import { clearMessage } from "@/utils/message";
 
+import {
+  ToastVariants,
+  type ToastColorType,
+  type ToastSizeType,
+} from "./variants";
+import { cn } from "@/utils/cn";
+
 type ToastProps = {
   messageId: string;
   message: string;
+  color?: ToastColorType;
+  size?: ToastSizeType;
   duration?: number;
 };
 
 export default function Toast(props: ToastProps) {
-  const { messageId, message, duration = 3000 } = props;
+  const { messageId, message, duration = 2000, color, size } = props;
 
   // refs
   const toastRef = useRef<HTMLParagraphElement>(null);
@@ -25,7 +34,7 @@ export default function Toast(props: ToastProps) {
     setIsCode(true);
     setTimeout(() => {
       clearMessage(messageId);
-    }, 300);
+    }, 290);
   }, [messageId]);
 
   const setAutoCloseTimeout = useCallback(() => {
@@ -52,7 +61,7 @@ export default function Toast(props: ToastProps) {
     <p
       id={messageId}
       ref={toastRef}
-      className="animate-fadeIn absolute bottom-[20%] left-1/2 z-40 w-auto max-w-[85%] -translate-x-1/2 rounded-lg bg-black/85 px-16 py-2 text-center text-lg text-white shadow-xl"
+      className={cn(ToastVariants({ color: color, size: size }))}
     >
       {message}
     </p>
