@@ -53,5 +53,5 @@ export async function getAuthUser(params: SignInRequest) {
  * @returns
  */
 export async function checkUserExist(email: string): Promise<boolean> {
-  return (await prisma.user.count({ where: { email } })) === 0;
+  return (await prisma.user.findFirst({ where: { email } })) != null;
 }
