@@ -5,7 +5,11 @@ import Naver from "next-auth/providers/naver";
 import Credentials from "next-auth/providers/credentials";
 import type { Provider } from "next-auth/providers";
 
-import { getAuthUser, checkUserExist } from "@/services/auth/sign.in.service";
+import {
+  getAuthUser,
+  getUserByEmail,
+  checkUserHasLinkedProvider,
+} from "@/services/auth/sign.in.service";
 
 const providers: Provider[] = [
   Credentials({
@@ -14,10 +18,19 @@ const providers: Provider[] = [
       password: { label: "Password", type: "password" },
     },
     authorize: async (credentials) => {
-      return await getAuthUser({
+      const user = await getAuthUser({
         email: credentials.email as string,
         password: credentials.password as string,
       });
+
+      // 기본 로그인 시 해당 이메일이 OAuth 계정으로 연동 되어있는지 체크
+      if (await checkUserHasLinkedProvider(user!.id)) {
+        throw new Error(
+          "소셜 로그인에 연동된 이메일입니다\n소셜 로그인을 이용해주세요",
+        );
+      }
+
+      return user;
     },
   }),
   Google,
@@ -70,18 +83,32 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: providers,
   callbacks: {
     async signIn({ user, account, profile }) {
+      // provider (google, kakao, naver)
+      const provider: string = account!.provider;
+
+      // 이메일로 DB 사용자 정보 가져오기
+      const dbUser = await getUserByEmail(user.email!);
+
       // 가입된 이용자가 아니라면 회원가입 페이지로 이동시킨다
-      if (await checkUserExist(user.email!)) {
-        const { email, name, image } = user;
-        const provider: string = account!.provider;
+      if (!dbUser)
         return encodeURI(
-          `/sign-up?email=${email}&name=${name}&image=${image}&provider=${provider.toUpperCase()}`,
+          `/sign-up?email=${user!.email}&name=${user!.name}&image=${user!.image}&provider=${provider.toUpperCase()}`,
         );
-      }
+
+      // OAuth 로그인 시 해당 이메일이 기존 회원가입 되어있는지 체크
+      if (
+        provider != "credentials" &&
+        !(await checkUserHasLinkedProvider(dbUser!.id, provider))
+      )
+        return encodeURI(
+          `/sign-in/error?error_message=이미 회원가입 된 이메일입니다\n기본 로그인을 이용해 주세요`,
+        );
+
       return true;
     },
   },
   pages: {
     signIn: "/sign-in", // 커스텀 페이지
+    error: "/sign-in/error",
   },
 });

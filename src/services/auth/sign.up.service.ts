@@ -1,5 +1,5 @@
 import { prisma } from "@/prisma";
-import { Provider } from "@/types/provider";
+import { Provider, getValue } from "@/types/provider";
 
 import { encryptPassword } from "@/utils/password";
 import { generateRandomText } from "@/utils/common";
@@ -10,11 +10,11 @@ import { EMAIL_RULE, PHONE_RULE } from "@/utils/validator";
  * @param email
  */
 async function checkEmail(email: string | null) {
-  if (!email) throw new Error("이메일이 존재하지 않습니다.");
+  if (!email) throw new Error("이메일이 존재하지 않습니다");
   if (!EMAIL_RULE.test(email))
     throw new Error("올바른 이메일 형식이 아닙니다.");
-  const sameEmailCnt: number = await prisma.user.count({ where: { email } });
-  if (sameEmailCnt > 0) throw new Error("이미 가입된 이메일입니다");
+  if (await prisma.user.findFirst({ where: { email } }))
+    throw new Error("이미 가입되거나 소셜 로그인에 연동된 이메일입니다");
 }
 
 /**
@@ -22,13 +22,15 @@ async function checkEmail(email: string | null) {
  * @param mobilePhone
  */
 async function checkMobilePhone(mobilePhone: string | null) {
-  if (!mobilePhone) throw new Error("전화번호가 존재하지 않습니다.");
+  if (!mobilePhone) throw new Error("전화번호가 존재하지 않습니다");
   if (!PHONE_RULE.test(mobilePhone))
-    throw new Error("올바른 전화번호 형식이 아닙니다.");
-  const sameMobilePhoneCnt: number = await prisma.user.count({
-    where: { mobilePhone },
-  });
-  if (sameMobilePhoneCnt > 0) throw new Error("이미 가입된 전화번호입니다");
+    throw new Error("올바른 전화번호 형식이 아닙니다");
+  if (
+    await prisma.user.findFirst({
+      where: { mobilePhone },
+    })
+  )
+    throw new Error("이미 가입된 전화번호입니다");
 }
 
 /**
@@ -62,14 +64,13 @@ export async function createUser(formData: FormData) {
         },
       });
 
-      // 2. 계정 연동이 있으면 accountProvider 테이블에 기록
+      // 2. 계정 연동이 있으면 linkedProvider 테이블에 기록
       if (provider) {
-        const currentProvider: Provider =
-          Provider[provider as keyof typeof Provider];
+        const currentProvider: Provider = getValue(provider);
 
-        if (!currentProvider) throw new Error("유효하지 않은 계정 연동입니다.");
+        if (!currentProvider) throw new Error("유효하지 않은 계정 연동입니다");
 
-        await prisma.accountProvider.create({
+        await prisma.linkedProvider.create({
           data: {
             userId: user.id,
             provider: currentProvider,

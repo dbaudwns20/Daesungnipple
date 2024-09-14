@@ -29,9 +29,10 @@ export default function SignIn() {
     if (!validateForm(e.target as HTMLFormElement)) return;
 
     startTransition(async () => {
-      const res = await SignInAction({ email, password });
-      showToast({ message: res.message });
-      if (res.ok) router.replace("/");
+      SignInAction({ email, password }).then((res) => {
+        if (res.ok) router.replace("/");
+        else showToast({ message: res.message });
+      });
     });
   };
 

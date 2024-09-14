@@ -52,9 +52,10 @@ export default function SignUp() {
     } else formData.append("password", password);
 
     startTransition(async () => {
-      const res = await SignUpAction(formData);
-      showToast({ message: res.message });
-      if (res.ok) router.replace("/sign-in");
+      SignUpAction(formData).then((res) => {
+        showToast({ message: res.message });
+        if (res.ok) router.replace("/sign-in");
+      });
     });
   };
 
@@ -140,7 +141,7 @@ export default function SignUp() {
           }}
           pattern={{
             regExp: PHONE_RULE,
-            invalidMessage: "올바른 휴대전화번호 형식이 아닙니다.",
+            invalidMessage: "올바른 휴대전화번호 형식이 아닙니다",
           }}
         />
         <Button type="submit" isFetching={isFetching} additionalClass="w-full">

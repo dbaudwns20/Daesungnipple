@@ -17,7 +17,7 @@ export const ButtonVariants = cva(
    rounded-lg
    select-none
    font-sans
-   font-bold
+   font-semibold
    text-white
    shadow-md
    shadow-gray-900/10

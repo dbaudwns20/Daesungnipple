@@ -1,5 +1,7 @@
 import { prisma } from "@/prisma";
 
+import { getValue } from "@/types/provider";
+
 import { EMAIL_RULE, PASSWORD_RULE } from "@/utils/validator";
 import { comparePassword } from "@/utils/password";
 
@@ -11,7 +13,7 @@ type SignInRequest = {
 const INVALID_EMAIL_MESSAGE: string = "이메일 형식이 유효하지 않습니다";
 const INVALID_PASSWORD_MESSAGE: string =
   "비밀번호는 영문자, 숫자, 특수문자를 포함 최소 8~20자로 입력해주세요";
-const SIGN_IN_MESSAGE: string = "이메일 또는 비밀번호가 일치하지 않습니다";
+const SIGN_IN_MESSAGE: string = "이메일 또는 비밀번호를 확인해주세요";
 
 /**
  * 로그인 기록 생성
@@ -52,6 +54,30 @@ export async function getAuthUser(params: SignInRequest) {
  * @param email
  * @returns
  */
-export async function checkUserExist(email: string): Promise<boolean> {
-  return (await prisma.user.findFirst({ where: { email } })) != null;
+export async function getUserByEmail(email: string) {
+  return await prisma.user.findFirst({ where: { email } });
+}
+
+/**
+ * OAuth 로그인 이용자가 기본 회원가입 되어있는지 체크
+ * @param userId
+ * @param provider
+ * @returns
+ */
+export async function checkUserHasLinkedProvider(
+  userId: number,
+  provider?: string,
+): Promise<boolean> {
+  let whereQuery: any = {
+    where: {
+      userId,
+    },
+  };
+  if (provider) {
+    whereQuery = {
+      ...whereQuery,
+      ...{ where: { provider: getValue(provider.toUpperCase()) } },
+    };
+  }
+  return (await prisma.linkedProvider.findFirst(whereQuery)) != null;
 }

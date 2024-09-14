@@ -20,11 +20,12 @@ export const ToastVariants = cva(
    max-w-[30%]
    -translate-x-1/2
    animate-fadeIn
-   whitespace-normal
-   break-words
+   whitespace-break-spaces
    rounded-lg
    text-center
-   shadow-xl`,
+   shadow-xl
+   sm:max-w-[85%]
+   md:max-w-[85%]`,
   {
     variants: {
       color: {
