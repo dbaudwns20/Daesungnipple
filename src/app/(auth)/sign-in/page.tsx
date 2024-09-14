@@ -76,19 +76,20 @@ export default function SignIn() {
           로그인
         </Button>
       </form>
-      <div className="mt-3 flex w-full items-center justify-end gap-1 font-semibold text-gray-400">
-        <Link className="text-sm hover:text-blue-400" href="/sign-up">
-          회원가입
+      <OAuthProviders />
+      <div className="mt-5 flex w-full items-center justify-center gap-1.5 font-semibold text-gray-400">
+        <Link className="hover:text-blue-400" href="/find?target=email">
+          이메일 찾기
         </Link>
         ·
-        <Link className="text-sm hover:text-blue-400" href="/find-password">
+        <Link className="hover:text-blue-400" href="/find?target=password">
           비밀번호 찾기
         </Link>
+        ·
+        <Link className="hover:text-blue-400" href="/sign-up">
+          회원가입
+        </Link>
       </div>
-      <div className="flex items-center py-5 text-xs uppercase text-gray-400 before:me-4 before:flex-1 before:border-t before:border-gray-200 after:ms-4 after:flex-1 after:border-t after:border-gray-200 dark:text-neutral-500 dark:before:border-neutral-600 dark:after:border-neutral-600">
-        다른 계정으로 로그인
-      </div>
-      <OAuthProviders />
     </div>
   );
 }

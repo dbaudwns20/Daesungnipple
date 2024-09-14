@@ -11,6 +11,12 @@ import {
   checkUserHasLinkedProvider,
 } from "@/services/auth/sign.in.service";
 
+const providerMap: Map<string, Provider> = new Map<string, Provider>([
+  ["GOOGLE", Google],
+  ["NAVER", Naver],
+  ["KAKAO", Kakao],
+]);
+
 const providers: Provider[] = [
   Credentials({
     credentials: {
@@ -33,10 +39,18 @@ const providers: Provider[] = [
       return user;
     },
   }),
-  Google,
-  Naver,
-  Kakao,
 ];
+
+function setProviders(): Provider[] {
+  const envProviders: string[] =
+    process.env.NEXT_PUBLIC_AUTH_PROVIDERS!.split("|");
+  envProviders.forEach((provider) => {
+    if (providerMap.has(provider)) {
+      providers.push(providerMap.get(provider)!);
+    }
+  });
+  return providers;
+}
 
 /**
  * 네이버 OAuth2 는 OAuth 2.0 스펙을 엄격히 지키지 않기 때문에 인터셉터로 중간 처리 필요
@@ -80,7 +94,7 @@ export const naverFetchInterceptor =
   };
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  providers: providers,
+  providers: setProviders(),
   callbacks: {
     async signIn({ user, account, profile }) {
       // provider (google, kakao, naver)
