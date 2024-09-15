@@ -41,7 +41,7 @@ export default function SignIn() {
   }, []);
 
   return (
-    <div className="rounded-lg p-12 sm:w-full md:w-1/2 lg:w-1/3">
+    <div className="w-1/3 rounded-lg p-12">
       <h1 className="mb-7 text-center text-2xl font-bold">로그인</h1>
       <form className="w-full" onSubmit={handleSubmit} noValidate>
         <Input

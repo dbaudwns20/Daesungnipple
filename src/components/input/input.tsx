@@ -163,7 +163,7 @@ const Input = forwardRef((props: InputProps, ref) => {
           disabled={isDisabled}
           onInvalid={handleInvalid}
           required={required.isRequired}
-          onChange={(e) => handleChange(e)}
+          onChange={handleChange}
         />
         <label
           id={`input_${inputId}`}
