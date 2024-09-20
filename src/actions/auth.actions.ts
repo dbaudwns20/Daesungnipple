@@ -2,7 +2,7 @@
 
 import { createUser } from "@/services/auth/sign.up.service";
 
-import { signIn, signOut } from "@/auth";
+import { signIn } from "@/auth";
 
 type AuthActionResponse = {
   ok: boolean;
@@ -53,8 +53,4 @@ export async function SignUpAction(formData: FormData) {
       message,
     } as AuthActionResponse;
   }
-}
-
-export async function SignOutAction() {
-  await signOut({ redirect: true, redirectTo: "/" });
 }

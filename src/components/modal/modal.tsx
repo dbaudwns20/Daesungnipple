@@ -44,7 +44,7 @@ export default function Modal(props: ModalProps) {
       overlayRef.current?.classList.remove(
         "animate-[fade-out_0.2s_ease_forwards]",
       );
-      setIsModalOpen ? setIsModalOpen!(false) : router.back();
+      setIsModalOpen ? setIsModalOpen(false) : router.back();
     }, 200);
   }, [setIsModalOpen, router]);
 

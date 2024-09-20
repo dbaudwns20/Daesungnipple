@@ -1,18 +1,24 @@
 import Footer from "@/components/footer/footer";
 import Header from "@/components/header/header";
 
+import { auth } from "@/auth";
 import { SessionProvider } from "next-auth/react";
 
-export default async function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default async function RootLayout(
+  props: Readonly<{
+    modal: React.ReactNode;
+    children: React.ReactNode;
+  }>,
+) {
+  const session = await auth();
   return (
-    <SessionProvider>
-      <Header />
-      {children}
+    <>
+      <Header session={session} />
+      <SessionProvider>
+        {props.children}
+        {props.modal}
+      </SessionProvider>
       <Footer />
-    </SessionProvider>
+    </>
   );
 }
