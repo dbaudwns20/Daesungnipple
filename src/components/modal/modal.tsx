@@ -9,6 +9,7 @@ import {
   useCallback,
   useRef,
 } from "react";
+import { useRouter } from "next/navigation";
 
 import { ModalVariants } from "./variants";
 
@@ -17,7 +18,6 @@ import { cn } from "@/utils/cn";
 type ModalProps = {
   children: ReactNode;
   isCloseOnClickOverlay?: boolean;
-  isUseBackground?: boolean;
   setIsModalOpen?: Dispatch<SetStateAction<boolean>>;
   width?: string;
 };
@@ -26,13 +26,16 @@ export default function Modal(props: ModalProps) {
   const {
     children,
     isCloseOnClickOverlay = false,
-    isUseBackground = true,
-    setIsModalOpen,
+    setIsModalOpen = null /** 닫기 함수가 없다면 url 경로를 갖고 있는 모달로 취급한다.  */,
     width = "w-[580px]",
   } = props;
 
+  // refs
   const overlayRef = useRef<HTMLSelectElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
+
+  // router
+  const router = useRouter();
 
   // 모달 닫기
   const closeModal = useCallback(() => {
@@ -41,9 +44,9 @@ export default function Modal(props: ModalProps) {
       overlayRef.current?.classList.remove(
         "animate-[fade-out_0.2s_ease_forwards]",
       );
-      setIsModalOpen!(false);
+      setIsModalOpen ? setIsModalOpen!(false) : router.back();
     }, 200);
-  }, [setIsModalOpen]);
+  }, [setIsModalOpen, router]);
 
   // Esc 키를 누르면 모달 닫기
   const onKeyDown = useCallback(
@@ -71,7 +74,7 @@ export default function Modal(props: ModalProps) {
   return (
     <section
       ref={overlayRef}
-      className="fixed inset-0 z-20 mx-auto animate-[fade-in_0.2s_ease_forwards] bg-black/60"
+      className="fixed inset-0 z-20 mx-auto animate-[fade-in_0.2s_ease_forwards] overflow-hidden bg-black/60"
       onClick={handleOverlayClick}
     >
       <div ref={modalRef} className={cn(ModalVariants({}), width)}>
