@@ -6,7 +6,7 @@ import { signOut } from "next-auth/react";
 import { type Session } from "next-auth";
 
 type HeaderProps = {
-  session: Session;
+  session: Session | null;
 };
 
 export default function MainHeader(props: HeaderProps) {
@@ -29,6 +29,7 @@ export default function MainHeader(props: HeaderProps) {
           <Link
             className="text-sm font-semibold text-gray-400 hover:cursor-pointer hover:text-blue-400"
             href={"/sign-in"}
+            scroll={false}
           >
             로그인
           </Link>
