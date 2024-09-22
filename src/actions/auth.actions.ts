@@ -1,6 +1,6 @@
 "use server";
 
-import { createUser } from "@/services/auth/sign.up.service";
+import { createUser } from "@/services/auth.service";
 
 import { signIn } from "@/auth";
 

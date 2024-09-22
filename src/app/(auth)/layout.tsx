@@ -12,7 +12,7 @@ export default function AuthLayout({
 }) {
   return (
     <main className="flex h-[100vh] w-full items-center justify-center">
-      <div className="sm:w-full md:w-1/2 lg:w-1/3">{children}</div>
+      <div className="rounded-lg sm:w-full md:w-1/2 lg:w-1/3">{children}</div>
     </main>
   );
 }

@@ -9,7 +9,7 @@ import {
   getAuthUser,
   getUserByEmail,
   checkUserHasLinkedProvider,
-} from "@/services/auth/sign.in.service";
+} from "@/services/auth.service";
 
 const providerMap: Map<string, Provider> = new Map<string, Provider>([
   ["GOOGLE", Google],

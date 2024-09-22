@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useRef, useEffect, useTransition, FormEvent } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 import Input, { type InputType } from "@/components/input/input";
 import Button, { type ButtonType } from "@/components/button/button";
 
 import { SignUpAction } from "@/actions/auth.actions";
+import { forceRedirect } from "@/actions/common.actions";
 
 import { showToast } from "@/utils/message";
 
@@ -19,7 +20,6 @@ import {
 
 export default function SignUp() {
   const searchParams = useSearchParams();
-  const router = useRouter();
 
   const emailRef = useRef<InputType>(null);
   const nameRef = useRef<InputType>(null);
@@ -54,7 +54,10 @@ export default function SignUp() {
     startTransition(async () => {
       SignUpAction(formData).then((res) => {
         showToast({ message: res.message });
-        if (res.ok) router.replace("/sign-in");
+        if (res.ok) {
+          // 라우트 인터셉트 방지
+          forceRedirect("/sign-in");
+        }
       });
     });
   };
@@ -65,7 +68,7 @@ export default function SignUp() {
   }, [isOAuthSignUp]);
 
   return (
-    <div className="rounded-lg p-12">
+    <div className="p-12">
       <h1 className="mb-7 text-center text-2xl font-bold">회원가입</h1>
       <form className="w-full" onSubmit={handleSubmit} noValidate>
         <Input
