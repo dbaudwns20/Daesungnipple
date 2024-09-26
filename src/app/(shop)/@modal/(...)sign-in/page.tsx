@@ -4,7 +4,7 @@ import Modal from "@/components/modal/modal";
 
 export default function ModalSignIn() {
   return (
-    <Modal isCloseOnClickOverlay={true}>
+    <Modal isCloseOnClickOverlay={true} width="w-[480px]">
       <SignIn />
     </Modal>
   );

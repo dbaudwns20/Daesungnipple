@@ -77,7 +77,7 @@ export default function SignIn() {
         </Button>
       </form>
       <OAuthProviders />
-      <div className="mt-5 flex w-full items-center justify-center gap-1.5 font-semibold text-gray-400">
+      <div className="mt-5 flex w-full items-center justify-center gap-1.5 font-semibold text-gray-500">
         <Link className="hover:text-blue-400" href="/find?target=email">
           이메일 찾기
         </Link>

@@ -1,6 +1,13 @@
 "use server";
 
-import { createUser } from "@/services/auth.service";
+import { checkFormData, checkParams } from "@/actions";
+
+import {
+  createUser,
+  checkEmail,
+  checkMobilePhone,
+  findEmailByNameAndMobilePhone,
+} from "@/services/auth.service";
 
 import { signIn } from "@/auth";
 
@@ -43,6 +50,7 @@ export async function SignInByOAuthAction(params: SignInParams) {
 export async function SignUpAction(formData: FormData) {
   let { ok, message } = { ok: true, message: "회원가입되었습니다" };
   try {
+    await checkFormData(formData, ["name", "email", "mobilePhone"]);
     await createUser(formData);
   } catch (e: any) {
     ok = false;
@@ -52,5 +60,31 @@ export async function SignUpAction(formData: FormData) {
       ok,
       message,
     } as AuthActionResponse;
+  }
+}
+
+type FindUserEmailParams = {
+  name: string;
+  mobilePhone: string;
+};
+
+export async function FindUserEmail(params: FindUserEmailParams) {
+  let response: AuthActionResponse = {
+    ok: true,
+    message: "이메일이 확인되었습니다",
+    data: null,
+  };
+  try {
+    await checkParams(params, ["name", "mobilePhone"]);
+    await checkMobilePhone(params.mobilePhone);
+    response.data = await findEmailByNameAndMobilePhone(
+      params.name,
+      params.mobilePhone,
+    );
+  } catch (e: any) {
+    response.ok = false;
+    response.message = e.message;
+  } finally {
+    return response;
   }
 }

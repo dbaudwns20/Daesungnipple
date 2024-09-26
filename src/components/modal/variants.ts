@@ -6,7 +6,7 @@ export const ModalVariants = cva(
    top-1/2
    -translate-x-1/2
    -translate-y-1/2
-   rounded-md
+   rounded-lg
    overflow-hidden
    bg-white
    shadow-lg

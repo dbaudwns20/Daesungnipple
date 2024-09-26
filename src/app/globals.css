@@ -22,10 +22,10 @@ body {
   margin-bottom: 2.5rem;
   border-bottom: 1px solid;
   border-color: #e5e7eb;
-  color: #6b7280;
+  color: #9ca3af;
 
   > ul {
-    margin-bottom: -1px;
+    margin-bottom: -2px;
     display: flex;
     width: 100%;
 
@@ -37,11 +37,35 @@ body {
         width: 100%;
         padding: 1rem;
         cursor: pointer;
+        transition-duration: 300ms;
 
         &:hover {
-          @apply bg-gray-300;
-          @apply text-gray-500;
+          color: #9ca3af;
+          border-bottom: 2px solid;
+          border-color: #d1d5db;
         }
+
+        &.is-active {
+          color: #3b82f6;
+          font-weight: 900;
+          border-bottom: 2px solid;
+          border-color: #3b82f6;
+        }
+      }
+    }
+  }
+
+  &.is-box {
+    border: 1px solid;
+    border-color: #e5e7eb;
+    border-top-left-radius: 0.75rem;
+    border-top-right-radius: 0.75rem;
+
+    > ul > li {
+      border-right: 1px solid #e5e7eb;
+
+      &:last-child {
+        border-right: none;
       }
     }
   }

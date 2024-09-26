@@ -76,8 +76,8 @@ export default function OAuthProviders() {
 
   return (
     <>
-      <div className="flex items-center py-5 text-sm font-semibold uppercase text-gray-500 before:me-4 before:flex-1 before:border-t before:border-gray-200 after:ms-4 after:flex-1 after:border-t after:border-gray-200 dark:text-neutral-500 dark:before:border-neutral-600 dark:after:border-neutral-600">
-        다른 계정으로 로그인
+      <div className="flex items-center py-5 text-sm font-semibold uppercase text-gray-400 before:me-4 before:flex-1 before:border-t before:border-gray-200 after:ms-4 after:flex-1 after:border-t after:border-gray-200 dark:text-neutral-500 dark:before:border-neutral-600 dark:after:border-neutral-600">
+        소셜 로그인으로 시작하기
       </div>
       <div className="grid gap-3">
         {providers.map((it, id) => {

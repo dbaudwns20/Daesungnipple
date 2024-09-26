@@ -1,12 +1,24 @@
 "use client";
 
-import { useState, useRef, useTransition, useEffect } from "react";
+import {
+  useState,
+  useRef,
+  useTransition,
+  useEffect,
+  useCallback,
+  FormEvent,
+} from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 import Input, { type InputType } from "@/components/input/input";
 import Button, { type ButtonType } from "@/components/button/button";
 
-import { EMAIL_RULE, PHONE_RULE } from "@/utils/validator";
+import { FindUserEmail } from "@/actions/auth.actions";
+import { forceRedirect } from "@/actions";
+
+import { EMAIL_RULE, PHONE_RULE, validateForm } from "@/utils/validator";
+import { showToast } from "@/utils/message";
 
 export default function Find() {
   const searchParams = useSearchParams();
@@ -16,69 +28,167 @@ export default function Find() {
   const nameRef = useRef<InputType>(null);
 
   // values
-  const [target, setTarget] = useState(searchParams.get("target"));
+  let target: string = searchParams.get("target")!;
+
+  const [findEmailResult, setFindEmailResult] = useState<{
+    email: string;
+    hasProvider: boolean;
+  } | null>(null);
+  const [email, setEmail] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [mobilePhone, setMobilePhone] = useState<string>("");
 
   const [isFetching, startTransition] = useTransition();
 
-  const switchTarget = (target: string) => {
-    setTarget(target);
+  const initValues = useCallback(() => {
+    setFindEmailResult(null);
+    setEmail("");
+    setName("");
+    setMobilePhone("");
+  }, []);
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    // 입력값 체크
+    if (!validateForm(e.target as HTMLFormElement)) return;
+
+    if (target === "email") {
+      startTransition(async () => {
+        FindUserEmail({ name, mobilePhone }).then((res) => {
+          if (res.ok) setFindEmailResult(res.data);
+          else showToast({ message: res.message });
+        });
+      });
+    }
   };
 
   useEffect(() => {
     if (target === "password") emailRef.current?.setFocus();
     else nameRef.current?.setFocus();
-  }, [target]);
+    initValues();
+  }, [target, initValues]);
 
   return (
     <div className="p-12">
       <div className="tabs">
         <ul>
           <li>
-            <a className="tab" onClick={() => switchTarget("email")}>
+            <Link
+              className={`tab ${target === "email" ? "is-active" : ""}`}
+              href="/find?target=email"
+              replace
+            >
               이메일
-            </a>
+            </Link>
           </li>
           <li>
-            <a className="tab" onClick={() => switchTarget("password")}>
+            <Link
+              className={`tab ${target === "password" ? "is-active" : ""}`}
+              href="/find?target=password"
+              replace
+            >
               비밀번호
-            </a>
+            </Link>
           </li>
         </ul>
       </div>
       <h1 className="mb-7 text-center text-2xl font-bold">
         {target === "password" ? "비밀번호 찾기" : "이메일 찾기"}
       </h1>
-      <form className="w-full" noValidate>
-        <Input
-          ref={nameRef}
-          inputType="text"
-          inputValue={name}
-          onChange={setName}
-          required={{
-            isRequired: true,
-            invalidMessage: "이름을 입력해주세요",
-          }}
-          labelText="이름"
-        />
-        <Input
-          inputType="text"
-          inputValue={mobilePhone}
-          onChange={setMobilePhone}
-          labelText="휴대전화번호"
-          required={{
-            isRequired: true,
-            invalidMessage: "휴대전화번호를 입력해주세요",
-          }}
-          pattern={{
-            regExp: PHONE_RULE,
-            invalidMessage: "올바른 휴대전화번호 형식이 아닙니다",
-          }}
-        />
-        <Button type="submit" isFetching={isFetching} additionalClass="w-full">
-          이메일 찾기
-        </Button>
+      <form className="w-full" onSubmit={handleSubmit} noValidate>
+        {target === "password" ? (
+          <>
+            <Input
+              ref={emailRef}
+              inputType="email"
+              inputValue={email}
+              onChange={setEmail}
+              required={{
+                isRequired: true,
+                invalidMessage: "이메일을 입력해주세요",
+              }}
+              pattern={{
+                regExp: EMAIL_RULE,
+                invalidMessage: "올바른 이메일 형식이 아닙니다",
+              }}
+              labelText="이메일"
+            />
+            <Button
+              type="submit"
+              isFetching={isFetching}
+              additionalClass="w-full"
+            >
+              비밀번호 찾기
+            </Button>
+          </>
+        ) : (
+          <>
+            {!findEmailResult ? (
+              <>
+                <Input
+                  ref={nameRef}
+                  inputType="text"
+                  inputValue={name}
+                  onChange={setName}
+                  required={{
+                    isRequired: true,
+                    invalidMessage: "이름을 입력해주세요",
+                  }}
+                  labelText="이름"
+                />
+                <Input
+                  inputType="text"
+                  inputValue={mobilePhone}
+                  onChange={setMobilePhone}
+                  labelText="휴대전화번호"
+                  required={{
+                    isRequired: true,
+                    invalidMessage: "휴대전화번호를 입력해주세요",
+                  }}
+                  pattern={{
+                    regExp: PHONE_RULE,
+                    invalidMessage: "올바른 휴대전화번호 형식이 아닙니다",
+                  }}
+                />
+                <Button
+                  type="submit"
+                  isFetching={isFetching}
+                  additionalClass="w-full"
+                >
+                  이메일 찾기
+                </Button>
+              </>
+            ) : (
+              <div className="text-center text-sm font-semibold text-gray-700">
+                <p className={findEmailResult.hasProvider ? "mb-7" : "mb-10"}>
+                  <span className="font-bold text-blue-500">{name}</span> 님의
+                  이메일은{" "}
+                  <span className="font-bold text-green-500">
+                    {findEmailResult.email}
+                  </span>{" "}
+                  입니다.
+                </p>
+                {findEmailResult.hasProvider ? (
+                  <p className="mb-7 rounded-lg border border-gray-300 py-3 text-sm text-blue-500">
+                    소셜 로그인으로 가입된 계정입니다.
+                    <br />
+                    소셜 로그인을 이용해주세요.
+                  </p>
+                ) : (
+                  <></>
+                )}
+                <Button
+                  type="button"
+                  additionalClass="w-full"
+                  onClick={() => forceRedirect("sign-in", "replace")}
+                >
+                  로그인하러 가기
+                </Button>
+              </div>
+            )}
+          </>
+        )}
       </form>
     </div>
   );

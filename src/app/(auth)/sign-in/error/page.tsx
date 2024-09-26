@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 
-import { forceRedirect } from "@/actions/common.actions";
+import { forceRedirect } from "@/actions";
 
 import { showToast } from "@/utils/message";
 import { useEffect } from "react";
@@ -29,7 +29,7 @@ export default function AuthErrorPage() {
 
   useEffect(() => {
     showToast({ message: errorMessage ?? errorMap[error] });
-    forceRedirect("/sign-in");
+    forceRedirect("/sign-in", "replace");
   });
 
   return (

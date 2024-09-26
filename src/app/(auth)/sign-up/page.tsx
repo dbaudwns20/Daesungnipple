@@ -7,7 +7,7 @@ import Input, { type InputType } from "@/components/input/input";
 import Button, { type ButtonType } from "@/components/button/button";
 
 import { SignUpAction } from "@/actions/auth.actions";
-import { forceRedirect } from "@/actions/common.actions";
+import { forceRedirect } from "@/actions";
 
 import { showToast } from "@/utils/message";
 
@@ -54,10 +54,7 @@ export default function SignUp() {
     startTransition(async () => {
       SignUpAction(formData).then((res) => {
         showToast({ message: res.message });
-        if (res.ok) {
-          // 라우트 인터셉트 방지
-          forceRedirect("/sign-in");
-        }
+        if (res.ok) forceRedirect("/sign-in", "replace"); // 라우트 인터셉트 방지
       });
     });
   };

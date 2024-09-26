@@ -4,7 +4,7 @@ import { Provider, getValue } from "@/types/provider";
 
 import { EMAIL_RULE, PASSWORD_RULE, PHONE_RULE } from "@/utils/validator";
 import { comparePassword, encryptPassword } from "@/utils/password";
-import { generateRandomText } from "@/utils/common";
+import { generateRandomText, maskingValue } from "@/utils/common";
 
 type SignInRequest = {
   email: string;
@@ -86,27 +86,36 @@ export async function checkUserHasLinkedProvider(
 /**
  * 동일 이메일 체크 및 형식 확인
  * @param email
+ * @param isSignUp
  */
-async function checkEmail(email: string | null) {
-  if (!email) throw new Error("이메일이 존재하지 않습니다");
+export async function checkEmail(
+  email: string | null,
+  isSignUp: boolean = false,
+) {
+  if (!email) throw new Error("이메일을 입력해주세요");
   if (!EMAIL_RULE.test(email))
     throw new Error("올바른 이메일 형식이 아닙니다.");
-  if (await prisma.user.findFirst({ where: { email } }))
+  if (isSignUp && (await prisma.user.findFirst({ where: { email } })))
     throw new Error("이미 가입되거나 소셜 로그인에 연동된 이메일입니다");
 }
 
 /**
  * 동일 전화번호 체크 및 형식 확인
  * @param mobilePhone
+ * @param isSignUp
  */
-async function checkMobilePhone(mobilePhone: string | null) {
-  if (!mobilePhone) throw new Error("전화번호가 존재하지 않습니다");
+export async function checkMobilePhone(
+  mobilePhone: string | null,
+  isSignUp: boolean = false,
+) {
+  if (!mobilePhone) throw new Error("전화번호를 입력해주세요");
   if (!PHONE_RULE.test(mobilePhone))
     throw new Error("올바른 전화번호 형식이 아닙니다");
   if (
-    await prisma.user.findFirst({
+    isSignUp &&
+    (await prisma.user.findFirst({
       where: { mobilePhone },
-    })
+    }))
   )
     throw new Error("이미 가입된 전화번호입니다");
 }
@@ -116,47 +125,62 @@ async function checkMobilePhone(mobilePhone: string | null) {
  * @param body
  */
 export async function createUser(formData: FormData) {
-  try {
-    await checkEmail(formData.get("email") as string);
-    await checkMobilePhone(formData.get("mobilePhone") as string);
+  await checkEmail(formData.get("email") as string, true);
+  await checkMobilePhone(formData.get("mobilePhone") as string, true);
 
-    const name: string = formData.get("name") as string;
-    const email: string = formData.get("email") as string;
-    const password: string =
-      (formData.get("password") as string) ?? generateRandomText();
-    const mobilePhone: string = formData.get("mobilePhone") as string;
-    const image: string | null = (formData.get("image") as string) ?? null;
-    const provider: string | null =
-      (formData.get("provider") as string) ?? null;
+  const name: string = formData.get("name") as string;
+  const email: string = formData.get("email") as string;
+  const password: string =
+    (formData.get("password") as string) ?? generateRandomText();
+  const mobilePhone: string = formData.get("mobilePhone") as string;
+  const image: string | null = (formData.get("image") as string) ?? null;
+  const provider: string | null = (formData.get("provider") as string) ?? null;
 
-    // 트랜잭션을 사용하여 데이터베이스 작업을 묶음 처리
-    await prisma.$transaction(async (prisma) => {
-      // 1. 사용자 생성
-      const user = await prisma.user.create({
+  // 트랜잭션을 사용하여 데이터베이스 작업을 묶음 처리
+  await prisma.$transaction(async (prisma) => {
+    // 1. 사용자 생성
+    const user = await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: encryptPassword(password),
+        mobilePhone,
+        image,
+      },
+    });
+
+    // 2. 계정 연동이 있으면 linkedProvider 테이블에 기록
+    if (provider) {
+      const currentProvider: Provider = getValue(provider);
+
+      if (!currentProvider) throw new Error("유효하지 않은 계정 연동입니다");
+
+      await prisma.linkedProvider.create({
         data: {
-          name,
-          email,
-          password: encryptPassword(password),
-          mobilePhone,
-          image,
+          userId: user.id,
+          provider: currentProvider,
         },
       });
+    }
+  });
+}
 
-      // 2. 계정 연동이 있으면 linkedProvider 테이블에 기록
-      if (provider) {
-        const currentProvider: Provider = getValue(provider);
-
-        if (!currentProvider) throw new Error("유효하지 않은 계정 연동입니다");
-
-        await prisma.linkedProvider.create({
-          data: {
-            userId: user.id,
-            provider: currentProvider,
-          },
-        });
-      }
-    });
-  } catch (e: any) {
-    throw new Error(e.message);
-  }
+export async function findEmailByNameAndMobilePhone(
+  name: string,
+  mobilePhone: string,
+): Promise<{
+  email: string;
+  hasProvider: boolean;
+}> {
+  // 이름과 전화번호로 이메일, 아이디 찾기
+  const res = await prisma.user.findFirst({
+    select: { id: true, email: true },
+    where: { name, mobilePhone },
+  });
+  if (!res) throw new Error("이름 또는 전화번호를 확인해주세요");
+  let [head, email]: string[] = res.email.split("@");
+  return {
+    email: maskingValue(head, false, 50) + "@" + email, // 마스킹 뒤에서 50%
+    hasProvider: await checkUserHasLinkedProvider(res.id), // OAuth 로그인 연동 되어있는지 확인
+  };
 }

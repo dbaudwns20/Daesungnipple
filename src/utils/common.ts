@@ -26,3 +26,16 @@ export function convertFileSizeToString(size: number): string {
     return sizeInKb.toFixed(2) + "KB";
   }
 }
+
+export function maskingValue(
+  value: string,
+  isFromTail: boolean = false,
+  percent: number = 50,
+): string {
+  const index: number = Math.floor(value.length * (percent / 100));
+  if (isFromTail) {
+    return "*".repeat(index) + value.substring(index);
+  } else {
+    return value.substring(0, value.length - index) + "*".repeat(index);
+  }
+}
