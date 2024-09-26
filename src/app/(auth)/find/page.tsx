@@ -14,7 +14,7 @@ import Link from "next/link";
 import Input, { type InputType } from "@/components/input/input";
 import Button, { type ButtonType } from "@/components/button/button";
 
-import { FindUserEmail } from "@/actions/auth.actions";
+import { FindUserEmail, SendPasswordRestEmail } from "@/actions/auth.actions";
 import { forceRedirect } from "@/actions";
 
 import { EMAIL_RULE, PHONE_RULE, validateForm } from "@/utils/validator";
@@ -34,6 +34,7 @@ export default function Find() {
     email: string;
     hasProvider: boolean;
   } | null>(null);
+  const [findPasswordResult, setFindPasswordResult] = useState<boolean>(false);
   const [email, setEmail] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [mobilePhone, setMobilePhone] = useState<string>("");
@@ -42,6 +43,7 @@ export default function Find() {
 
   const initValues = useCallback(() => {
     setFindEmailResult(null);
+    setFindPasswordResult(false);
     setEmail("");
     setName("");
     setMobilePhone("");
@@ -58,6 +60,13 @@ export default function Find() {
         FindUserEmail({ name, mobilePhone }).then((res) => {
           if (res.ok) setFindEmailResult(res.data);
           else showToast({ message: res.message });
+        });
+      });
+    } else {
+      startTransition(async () => {
+        SendPasswordRestEmail(email).then((res) => {
+          showToast({ message: res.message });
+          if (res.ok) setFindPasswordResult(true);
         });
       });
     }
@@ -99,28 +108,44 @@ export default function Find() {
       <form className="w-full" onSubmit={handleSubmit} noValidate>
         {target === "password" ? (
           <>
-            <Input
-              ref={emailRef}
-              inputType="email"
-              inputValue={email}
-              onChange={setEmail}
-              required={{
-                isRequired: true,
-                invalidMessage: "이메일을 입력해주세요",
-              }}
-              pattern={{
-                regExp: EMAIL_RULE,
-                invalidMessage: "올바른 이메일 형식이 아닙니다",
-              }}
-              labelText="이메일"
-            />
-            <Button
-              type="submit"
-              isFetching={isFetching}
-              additionalClass="w-full"
-            >
-              비밀번호 찾기
-            </Button>
+            {!findPasswordResult ? (
+              <>
+                <Input
+                  ref={emailRef}
+                  inputType="email"
+                  inputValue={email}
+                  onChange={setEmail}
+                  required={{
+                    isRequired: true,
+                    invalidMessage: "이메일을 입력해주세요",
+                  }}
+                  pattern={{
+                    regExp: EMAIL_RULE,
+                    invalidMessage: "올바른 이메일 형식이 아닙니다",
+                  }}
+                  labelText="이메일"
+                />
+                <Button
+                  type="submit"
+                  isFetching={isFetching}
+                  additionalClass="w-full"
+                >
+                  비밀번호 찾기
+                </Button>
+              </>
+            ) : (
+              <div className="text-center font-semibold text-gray-700">
+                <div className="mb-7">
+                  <p className="mb-5 font-bold text-blue-500">{email}</p>
+                  입력된 메일로 비밀번호 초기화 이메일을 발송했습니다.
+                  <br />
+                  이메일을 확인해주세요.
+                </div>
+                <p className="mb-7 rounded-lg border border-gray-300 py-3 text-sm font-bold text-blue-500">
+                  해당 이메일은 발송후 1시간 동안만 유효합니다.
+                </p>
+              </div>
+            )}
           </>
         ) : (
           <>
@@ -164,13 +189,13 @@ export default function Find() {
                 <p className={findEmailResult.hasProvider ? "mb-7" : "mb-10"}>
                   <span className="font-bold text-blue-500">{name}</span> 님의
                   이메일은{" "}
-                  <span className="font-bold text-green-500">
+                  <span className="font-bold text-green-600">
                     {findEmailResult.email}
                   </span>{" "}
                   입니다.
                 </p>
                 {findEmailResult.hasProvider ? (
-                  <p className="mb-7 rounded-lg border border-gray-300 py-3 text-sm text-blue-500">
+                  <p className="mb-7 rounded-lg border border-gray-300 py-3 text-sm font-bold text-blue-500">
                     소셜 로그인으로 가입된 계정입니다.
                     <br />
                     소셜 로그인을 이용해주세요.

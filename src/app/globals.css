@@ -56,8 +56,7 @@ body {
   }
 
   &.is-box {
-    border: 1px solid;
-    border-color: #e5e7eb;
+    border: 1px solid #e5e7eb;
     border-top-left-radius: 0.75rem;
     border-top-right-radius: 0.75rem;
 

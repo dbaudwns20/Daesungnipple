@@ -48,18 +48,18 @@ export async function SignInByOAuthAction(params: SignInParams) {
 }
 
 export async function SignUpAction(formData: FormData) {
-  let { ok, message } = { ok: true, message: "회원가입되었습니다" };
+  let response: AuthActionResponse = {
+    ok: true,
+    message: "회원가입되었습니다",
+  };
   try {
     await checkFormData(formData, ["name", "email", "mobilePhone"]);
     await createUser(formData);
   } catch (e: any) {
-    ok = false;
-    message = e.message;
+    response.ok = false;
+    response.message = e.message;
   } finally {
-    return {
-      ok,
-      message,
-    } as AuthActionResponse;
+    return response;
   }
 }
 
@@ -81,6 +81,22 @@ export async function FindUserEmail(params: FindUserEmailParams) {
       params.name,
       params.mobilePhone,
     );
+  } catch (e: any) {
+    response.ok = false;
+    response.message = e.message;
+  } finally {
+    return response;
+  }
+}
+
+export async function SendPasswordRestEmail(email: string) {
+  let response: AuthActionResponse = {
+    ok: true,
+    message: "이메일이 발송되었습니다.",
+  };
+  try {
+    await checkEmail(email);
+    // 이메일 발송
   } catch (e: any) {
     response.ok = false;
     response.message = e.message;
