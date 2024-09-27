@@ -47,7 +47,7 @@ body {
 
         &.is-active {
           color: #3b82f6;
-          font-weight: 900;
+          font-weight: 700;
           border-bottom: 2px solid;
           border-color: #3b82f6;
         }
