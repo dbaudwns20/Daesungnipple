@@ -11,11 +11,11 @@ import {
 
 import { signIn } from "@/auth";
 
-type AuthActionResponse = {
+interface AuthActionResponse {
   ok: boolean;
   message: string;
-  data?: any;
-};
+  data?: unknown;
+}
 
 type SignInParams = {
   email?: string;

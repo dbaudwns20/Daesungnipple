@@ -20,6 +20,11 @@ import { forceRedirect } from "@/actions";
 import { EMAIL_RULE, PHONE_RULE, validateForm } from "@/utils/validator";
 import { showToast } from "@/utils/message";
 
+type FindEmailResult = {
+  email: string;
+  hasProvider: boolean;
+};
+
 export default function Find() {
   const searchParams = useSearchParams();
 
@@ -30,10 +35,8 @@ export default function Find() {
   // values
   let target: string = searchParams.get("target")!;
 
-  const [findEmailResult, setFindEmailResult] = useState<{
-    email: string;
-    hasProvider: boolean;
-  } | null>(null);
+  const [findEmailResult, setFindEmailResult] =
+    useState<FindEmailResult | null>(null);
   const [findPasswordResult, setFindPasswordResult] = useState<boolean>(false);
   const [email, setEmail] = useState<string>("");
   const [name, setName] = useState<string>("");
@@ -58,7 +61,7 @@ export default function Find() {
     if (target === "email") {
       startTransition(async () => {
         FindUserEmail({ name, mobilePhone }).then((res) => {
-          if (res.ok) setFindEmailResult(res.data);
+          if (res.ok) setFindEmailResult(res.data as FindEmailResult);
           else showToast({ message: res.message });
         });
       });
