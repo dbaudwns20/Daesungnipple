@@ -5,9 +5,12 @@ import {
   useImperativeHandle,
   forwardRef,
   ChangeEvent,
+  KeyboardEvent,
   InvalidEvent,
   Dispatch,
   SetStateAction,
+  useCallback,
+  useEffect,
 } from "react";
 
 import { InputVariants, LabelVariants } from "./variants";
@@ -27,18 +30,28 @@ type Pattern = {
   invalidMessage: string;
 };
 
+type NumberTypeProps = {
+  inputType: "number";
+  inputValue: number;
+  step?: number;
+  onChange: Dispatch<SetStateAction<number>>;
+};
+
+type CommonTypeProps = {
+  inputType: "text" | "password" | "email";
+  inputValue: string;
+  pattern?: Pattern | null;
+  onChange: Dispatch<SetStateAction<string>>;
+};
+
 type InputProps = {
-  inputType: "text" | "password" | "number" | "email";
-  inputValue: any;
   labelText: string;
   isDisabled?: boolean;
   isReadOnly?: boolean;
   required?: Required;
-  pattern?: Pattern;
-  valueRange?: [number, number];
+  valueRange?: [number, number] | null;
   additionalClass?: string;
-  onChange: Dispatch<SetStateAction<string>> | Dispatch<SetStateAction<number>>;
-};
+} & (CommonTypeProps | NumberTypeProps);
 
 const Input = forwardRef((props: InputProps, ref) => {
   const {
@@ -51,14 +64,14 @@ const Input = forwardRef((props: InputProps, ref) => {
       isRequired: false,
       invalidMessage: "",
     },
-    pattern = {
-      regExp: null,
-      invalidMessage: "",
-    },
-    valueRange,
+    valueRange = null,
     additionalClass = "",
     onChange,
   } = props;
+
+  const pattern: Pattern | null =
+    inputType !== "number" ? (props.pattern ?? null) : null;
+  const step: number | null = inputType === "number" ? (props.step ?? 1) : null;
 
   // 부모 컴포넌트에서 사용할 수 있는 함수 선언
   useImperativeHandle(ref, () => ({ setFocus }));
@@ -73,81 +86,106 @@ const Input = forwardRef((props: InputProps, ref) => {
   const [invalidMessage, setInvalidMessage] = useState<string | null>(null);
 
   // focus
-  const setFocus = () => {
+  const setFocus = useCallback(() => {
     inputRef.current!.focus();
     inputRef.current!.select();
-  };
+  }, []);
 
   // 커스텀규칙 정의
-  const setCustomValidity = (
-    errorMessage: string,
-    invalidText: string = "",
-  ) => {
-    inputRef.current?.setCustomValidity(errorMessage);
-    setIsInvalid(invalidText.length > 0);
-    setInvalidMessage(invalidText.length > 0 ? invalidText : null);
+  const setCustomValidity = useCallback(
+    (errorMessage: string, invalidText: string = "") => {
+      inputRef.current?.setCustomValidity(errorMessage);
+      if (invalidText.length > 0) {
+        setIsInvalid(true);
+        setInvalidMessage(invalidText);
+      } else {
+        setIsInvalid(false);
+        setInvalidMessage(null);
+      }
+    },
+    [],
+  );
+
+  const validateValueRange = useCallback(
+    (value: string | number): [string, string] => {
+      let errorMessage = "";
+      let invalidText = "";
+      if (valueRange) {
+        const [min, max] = valueRange;
+        if (inputType !== "number") {
+          const strValue = value as string;
+          if (strValue.length < min) {
+            errorMessage = "Value's length is invalid.";
+            invalidText = `최소 ${min}자 이상 입력해야합니다`;
+          } else if (strValue.length > max) {
+            errorMessage = "Value's length is invalid.";
+            invalidText = `최대 ${max}자 까지만 입력가능합니다`;
+          }
+        } else {
+          const numValue = Number(value);
+          if (numValue < min) {
+            errorMessage = "Value's range is invalid.";
+            invalidText = `${min} 이상 입력해야합니다`;
+          } else if (numValue > max) {
+            errorMessage = "Value's range is invalid.";
+            invalidText = `${max} 이하만 입력가능합니다`;
+          }
+        }
+      }
+      return [errorMessage, invalidText];
+    },
+    [inputType, valueRange],
+  );
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    // email 인 경우 스페이스 키 입력이 onChange 로 헨들링 되지 않는다
+    if (inputType === "email" && event.key === " ") {
+      event.preventDefault(); // 스페이스 입력을 막음
+    }
   };
 
   // change 이벤트 헨들링
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    let value: any = event.target.value;
+  const handleChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      let value: any = event.target.value;
 
-    if (!value) {
-      setCustomValidity("");
-      onChange(value);
-      return;
-    }
+      // inputType 이 number 가 아닌 경우에만 trim 적용
+      if (inputType !== "number") {
+        value = value.trim();
+      }
 
-    let errorMessage: string = "";
-    let invalidText: string = "";
+      if (!value) {
+        setCustomValidity("");
+        onChange(value);
+        return;
+      }
 
-    // 정규식 체크
-    if (pattern.regExp) {
-      const { regExp, invalidMessage } = pattern;
-      if (!regExp.test(value)) {
+      let [errorMessage, invalidText] = validateValueRange(value);
+
+      if (inputType !== "number" && pattern && !pattern.regExp.test(value)) {
         errorMessage = "Value's format is invalid.";
-        invalidText = invalidMessage;
+        invalidText = pattern.invalidMessage;
       }
-    }
 
-    // 값 범위가 존재할 경우
-    if (valueRange) {
-      const [min, max]: [number, number] = valueRange;
-      if (inputType != "number") {
-        // 길이 체크
-        if (value.length < min) {
-          errorMessage = "Value's length is invalid.";
-          invalidText = `최소 ${min}자 이상 입력해야합니다`;
-        }
-        if (value.length > max) {
-          errorMessage = "Value's length is invalid.";
-          invalidText = `최대 ${max}자 까지만 입력가능합니다`;
-        }
-      } else {
-        // 범위 체크
-        if (Number(value) < min) {
-          errorMessage = "Value's range is invalid.";
-          invalidText = `${min} 이상 입력해야합니다`;
-        }
-        if (Number(value) > max) {
-          errorMessage = "Value's range is invalid.";
-          invalidText = `${max} 이하만 입력가능합니다`;
-        }
+      setCustomValidity(errorMessage, invalidText);
+      onChange(value);
+    },
+    [inputType, pattern, setCustomValidity, onChange, validateValueRange],
+  );
+
+  const handleInvalid = useCallback(
+    (event: InvalidEvent<HTMLInputElement>) => {
+      const value: any = event.target.value;
+      if (required.isRequired && !value) {
+        setCustomValidity("Value is missing.", required.invalidMessage);
       }
-    }
+    },
+    [required, setCustomValidity],
+  );
 
-    setCustomValidity(errorMessage, invalidText);
-    onChange(value);
-  };
-
-  // invalid 이벤트 헨들링 => Submit 이벤트 후 처리
-  const handleInvalid = (event: InvalidEvent<HTMLInputElement>) => {
-    const value: any = event.target.value;
-
-    if (required.isRequired && !value) {
-      setCustomValidity("Value is missing.", required.invalidMessage);
-    }
-  };
+  useEffect(() => {
+    if (step) inputRef.current?.setAttribute("step", step.toString());
+  }, [step]);
 
   return (
     <div className={`block ${!isInvalid ? "mb-3" : "mb-1.5"}`}>
@@ -164,6 +202,7 @@ const Input = forwardRef((props: InputProps, ref) => {
           onInvalid={handleInvalid}
           required={required.isRequired}
           onChange={handleChange}
+          onKeyDown={handleKeyDown}
         />
         <label
           id={`input_${inputId}`}
