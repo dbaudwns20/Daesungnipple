@@ -111,7 +111,7 @@ export default function SignUp() {
                 invalidMessage: "비밀번호확인을 입력해주세요",
               }}
               pattern={{
-                regExp: new RegExp(password),
+                regExp: password ? new RegExp(`^${password}$`) : /^(?!.*)/,
                 invalidMessage: "비밀번호가 일치하지 않습니다",
               }}
             />
