@@ -55,7 +55,7 @@ export async function getAuthUser(params: SignInRequest) {
  * @param email
  * @returns
  */
-export async function getUserByEmail(email: string) {
+export async function findUserByEmail(email: string) {
   return await prisma.user.findFirst({ where: { email } });
 }
 
@@ -70,17 +70,15 @@ export async function checkUserHasLinkedProvider(
   provider?: string,
 ): Promise<boolean> {
   let whereQuery: any = {
-    where: {
-      userId,
-    },
+    userId,
   };
   if (provider) {
     whereQuery = {
       ...whereQuery,
-      ...{ where: { provider: getValue(provider.toUpperCase()) } },
+      ...{ provider: getValue(provider.toUpperCase()) },
     };
   }
-  return (await prisma.linkedProvider.findFirst(whereQuery)) != null;
+  return (await prisma.linkedProvider.findFirst({ where: whereQuery })) != null;
 }
 
 /**
@@ -95,7 +93,7 @@ export async function checkEmail(
   if (!email) throw new Error("이메일을 입력해주세요");
   if (!EMAIL_RULE.test(email))
     throw new Error("올바른 이메일 형식이 아닙니다.");
-  if (isSignUp && (await prisma.user.findFirst({ where: { email } })))
+  if (isSignUp && (await findUserByEmail(email)))
     throw new Error("이미 가입되거나 소셜 로그인에 연동된 이메일입니다");
 }
 
