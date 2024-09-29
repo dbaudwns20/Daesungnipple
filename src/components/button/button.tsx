@@ -16,6 +16,7 @@ import { cn } from "@/utils/cn";
 
 export type ButtonType = {
   setFocus: () => void;
+  element: HTMLButtonElement | null;
 };
 
 type ButtonProps = {
@@ -42,36 +43,36 @@ const Button = forwardRef((props: ButtonProps, ref) => {
   } = props;
 
   // 부모 컴포넌트에서 사용할 수 있는 함수 선언
-  useImperativeHandle(ref, () => ({ setFocus }));
+  useImperativeHandle(ref, () => ({ setFocus, element: componentRef.current }));
 
   // refs
-  const buttonRef = useRef<HTMLButtonElement>(null);
+  const componentRef = useRef<HTMLButtonElement>(null);
 
   // values
   const buttonId: string = useId();
 
   const setFocus = () => {
-    buttonRef.current!.focus();
+    componentRef.current!.focus();
   };
 
   useEffect(() => {
     if (isDisabled) return;
     if (isFetching) {
-      buttonRef.current!.setAttribute("disabled", "disabled");
+      componentRef.current!.setAttribute("disabled", "disabled");
     } else {
-      buttonRef.current!.removeAttribute("disabled");
+      componentRef.current!.removeAttribute("disabled");
     }
   }, [isDisabled, isFetching]);
 
   return (
     <button
+      ref={componentRef}
       id={`${type}_${buttonId}`}
       aria-describedby={`${type}_${buttonId}`}
       className={cn(
         ButtonVariants({ color: color, size: size }),
         additionalClass,
       )}
-      ref={buttonRef}
       type={type}
       disabled={isDisabled}
       onClick={onClick}

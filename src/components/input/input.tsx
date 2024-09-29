@@ -18,6 +18,8 @@ import { cn } from "@/utils/cn";
 
 export type InputType = {
   setFocus: () => void;
+  setCustomValidity: (errorMessage: string, invalidText: string) => void;
+  element: HTMLDivElement | null;
 };
 
 type Required = {
@@ -74,9 +76,14 @@ const Input = forwardRef((props: InputProps, ref) => {
   const step: number | null = inputType === "number" ? (props.step ?? 1) : null;
 
   // 부모 컴포넌트에서 사용할 수 있는 함수 선언
-  useImperativeHandle(ref, () => ({ setFocus }));
+  useImperativeHandle(ref, () => ({
+    setFocus,
+    setCustomValidity,
+    element: componentRef.current,
+  }));
 
   // refs
+  const componentRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const labelRef = useRef<HTMLLabelElement>(null);
 
@@ -188,7 +195,10 @@ const Input = forwardRef((props: InputProps, ref) => {
   }, [step]);
 
   return (
-    <div className={`block ${!isInvalid ? "mb-3" : "mb-1.5"}`}>
+    <div
+      ref={componentRef}
+      className={`block ${!isInvalid ? "mb-3" : "mb-1.5"}`}
+    >
       <div className="relative h-12 w-full">
         <input
           id={`input_${inputId}`}
