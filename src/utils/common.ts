@@ -2,11 +2,11 @@
  * 난수 문자열 생성
  * @returns
  */
-export function generateRandomText(): string {
+export function generateRandomText(length: number = 8): string {
   const characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let result: string = "";
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < length; i++) {
     const randomIndex: number = Math.floor(Math.random() * characters.length);
     result += characters.charAt(randomIndex);
   }
