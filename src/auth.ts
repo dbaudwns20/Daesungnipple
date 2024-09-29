@@ -7,7 +7,7 @@ import type { Provider } from "next-auth/providers";
 
 import {
   getAuthUser,
-  getUserByEmail,
+  findUserByEmail,
   checkUserHasLinkedProvider,
 } from "@/services/auth.service";
 
@@ -101,12 +101,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       const provider: string = account!.provider;
 
       // 이메일로 DB 사용자 정보 가져오기
-      const dbUser = await getUserByEmail(user.email!);
+      const dbUser = await findUserByEmail(user.email!);
 
       // 가입된 이용자가 아니라면 회원가입 페이지로 이동시킨다
       if (!dbUser)
         return encodeURI(
-          `/sign-up?email=${user!.email}&name=${user!.name}&image=${user!.image}&provider=${provider.toUpperCase()}`,
+          `/sign-up?email=${user!.email}&image=${user!.image}&provider=${provider.toUpperCase()}`,
         );
 
       // OAuth 로그인 시 해당 이메일이 기존 회원가입 되어있는지 체크

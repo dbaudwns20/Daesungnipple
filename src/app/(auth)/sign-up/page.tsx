@@ -27,7 +27,7 @@ export default function SignUp() {
   const [email, setEmail] = useState<string>(searchParams.get("email") ?? "");
   const [password, setPassword] = useState<string>("");
   const [passwordCheck, setPasswordCheck] = useState<string>("");
-  const [name, setName] = useState<string>(searchParams.get("name") ?? "");
+  const [name, setName] = useState<string>("");
   const [mobilePhone, setMobilePhone] = useState<string>("");
   const image: string = searchParams.get("image") ?? "";
   const provider: string = searchParams.get("provider") ?? "";
