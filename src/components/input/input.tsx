@@ -202,6 +202,7 @@ const Input = forwardRef((props: InputProps, ref) => {
       <div className="relative h-12 w-full">
         <input
           id={`input_${inputId}`}
+          aria-label={labelText}
           className={cn(InputVariants({ invalid: isInvalid }), additionalClass)}
           placeholder=" "
           ref={inputRef}
