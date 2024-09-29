@@ -182,3 +182,31 @@ export async function findEmailByNameAndMobilePhone(
     hasProvider: await checkUserHasLinkedProvider(res.id), // OAuth 로그인 연동 되어있는지 확인
   };
 }
+
+export async function generatePasswordResetToken(email: string) {
+  const user = await findUserByEmail(email);
+
+  if (!user) throw new Error("이메일을 확인해주세요");
+
+  const currentTime: number = new Date().getTime();
+  const token = "TOKEN_VALUE"; //TODO 인증 토큰 뭘로 만들어야 하지?
+
+  await prisma.$transaction(async (prisma) => {
+    await prisma.passwordRestToken.upsert({
+      where: { userId_validType: { userId: user.id, validType: "MAIL" } },
+      update: {
+        token,
+        createdAt: new Date(currentTime),
+        expiredAt: new Date(currentTime + 60 * 60 * 1000),
+      },
+      create: {
+        userId: user.id,
+        validType: "MAIL",
+        token,
+        createdAt: new Date(currentTime),
+        expiredAt: new Date(currentTime + 60 * 60 * 1000),
+      },
+    });
+  });
+  return token;
+}

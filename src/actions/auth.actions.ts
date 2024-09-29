@@ -7,6 +7,7 @@ import {
   checkEmail,
   checkMobilePhone,
   findEmailByNameAndMobilePhone,
+  generatePasswordResetToken,
 } from "@/services/auth.service";
 
 import { signIn } from "@/auth";
@@ -96,7 +97,25 @@ export async function SendPasswordRestEmail(email: string) {
   };
   try {
     await checkEmail(email);
+
+    // 인증 토큰 생성
+    const token: string = await generatePasswordResetToken(email);
+
     // 이메일 발송
+  } catch (e: any) {
+    response.ok = false;
+    response.message = e.message;
+  } finally {
+    return response;
+  }
+}
+
+export async function CheckPasswordResetToken(token: string) {
+  let response: AuthActionResponse = {
+    ok: true,
+    message: "인증되었습니다.",
+  };
+  try {
   } catch (e: any) {
     response.ok = false;
     response.message = e.message;

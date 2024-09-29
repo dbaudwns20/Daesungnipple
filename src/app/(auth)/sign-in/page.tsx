@@ -89,6 +89,17 @@ export default function SignIn() {
         <Link className="hover:text-blue-400" href="/sign-up">
           회원가입
         </Link>
+        {/* 임시 */}
+        <Link className="hover:text-blue-400" href="/reset-password">
+          비밀번호 초기화
+        </Link>
+        {/* 임시 */}
+        <Link
+          className="hover:text-blue-400"
+          href="/reset-password?token=fsdafdsafdsafdsaifojioasjdf"
+        >
+          비밀번호 초기화 토큰
+        </Link>
       </div>
     </div>
   );
