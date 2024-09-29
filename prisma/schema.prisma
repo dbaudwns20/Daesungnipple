@@ -9,17 +9,18 @@ datasource db {
 
 // 회원정보
 model User {
-  id             Int              @id @default(autoincrement())
-  email          String           @map("email") @db.VarChar(100)
-  password       String           @map("password") @db.VarChar(255)
-  name           String           @map("name") @db.VarChar(100)
-  mobilePhone    String           @map("mobile_phone") @db.VarChar(15)
-  image          String?          @map("image") @db.VarChar(2000)
-  createdAt      DateTime         @default(now()) @map("created_at") @db.Timestamp(0)
-  updatedAt      DateTime         @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
-  deletedAt      DateTime?        @map("deleted_at") @db.Timestamp(0)
-  linkedProvider LinkedProvider[]
-  customerInfo   CustomerInfo[]
+  id                     Int                      @id @default(autoincrement())
+  email                  String                   @map("email") @db.VarChar(100)
+  password               String                   @map("password") @db.VarChar(255)
+  name                   String                   @map("name") @db.VarChar(100)
+  mobilePhone            String                   @map("mobile_phone") @db.VarChar(15)
+  image                  String?                  @map("image") @db.VarChar(2000)
+  createdAt              DateTime                 @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt              DateTime                 @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
+  deletedAt              DateTime?                @map("deleted_at") @db.Timestamp(0)
+  linkedProvider         LinkedProvider[]
+  customerInfo           CustomerInfo[]
+  passwordRestToken PasswordRestToken[]
 
   @@unique([email, mobilePhone])
   @@map("user")
@@ -38,9 +39,9 @@ model LinkedProvider {
   provider  Provider
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
   deletedAt DateTime? @map("deleted_at") @db.Timestamp(0)
-  user      User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_LINKED_PROVIDER_USER_USER_ID")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@index([userId], map: "IDX_LINKED_PROVIDER_USER_ID")
+  @@index([userId])
   @@map("linked_provider")
 }
 
@@ -58,8 +59,27 @@ model CustomerInfo {
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
   updatedAt     DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
   deletedAt     DateTime? @map("deleted_at") @db.Timestamp(0)
-  user          User?     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_CUSTOMER_INFO_USER_USER_ID")
+  user          User?     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@index([userId], map: "IDX_CUSTOMER_INFO_USER_ID")
+  @@index([userId])
   @@map("customer_info")
+}
+
+enum ValidType {
+  MAIL
+  MOBILE
+}
+
+model PasswordRestToken {
+  userId    Int       @map("user_id")
+  validType ValidType @map("valid_type")
+  token     String    @db.VarChar(64)
+  isUsed    Boolean   @default(false)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
+  expiredAt DateTime  @map("expired_at") @db.Timestamp(0)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([userId, validType])
+  @@index([userId])
+  @@map("password_reset_token")
 }
