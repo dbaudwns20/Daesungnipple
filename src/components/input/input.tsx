@@ -40,7 +40,7 @@ type NumberTypeProps = {
 };
 
 type CommonTypeProps = {
-  inputType: "text" | "password" | "email";
+  inputType: "text" | "password" | "email" | "tel";
   inputValue: string;
   pattern?: Pattern | null;
   onChange: Dispatch<SetStateAction<string>>;
