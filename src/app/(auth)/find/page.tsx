@@ -188,7 +188,7 @@ export default function Find() {
                 </Button>
               </>
             ) : (
-              <div className="text-center text-sm font-semibold text-gray-700">
+              <div className="text-center font-semibold text-gray-700">
                 <p className={findEmailResult.hasProvider ? "mb-7" : "mb-10"}>
                   <span className="font-bold text-blue-500">{name}</span> 님의
                   이메일은{" "}

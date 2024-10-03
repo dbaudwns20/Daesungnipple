@@ -27,6 +27,13 @@ export function convertFileSizeToString(size: number): string {
   }
 }
 
+/**
+ * 문자열 마스킹
+ * @param value
+ * @param isFromTail true: 앞에서 false: 뒤에서
+ * @param percent 마스킹 비율
+ * @returns
+ */
 export function maskingValue(
   value: string,
   isFromTail: boolean = false,

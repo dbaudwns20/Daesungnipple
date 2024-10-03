@@ -2,12 +2,15 @@
 
 import { checkFormData, checkParams } from "@/actions";
 
+import { SendMethod } from "@/types/common";
+
 import {
   createUser,
-  checkEmail,
   checkMobilePhone,
   findEmailByNameAndMobilePhone,
-  generatePasswordResetToken,
+  generatePasswordResetVerification,
+  checkUserHasLinkedProvider,
+  findUserByEmail,
 } from "@/services/auth.service";
 
 import { signIn } from "@/auth";
@@ -26,18 +29,18 @@ type SignInParams = {
 };
 
 export async function SignInAction(params: SignInParams) {
-  let { ok, message } = { ok: true, message: "로그인되었습니다" };
+  const response: AuthActionResponse = {
+    ok: true,
+    message: "로그인되었습니다",
+  };
   try {
     const { email, password } = params;
     await signIn("credentials", { email, password, redirect: false });
   } catch (e: any) {
-    ok = false;
-    message = e.cause.err.message;
+    response.ok = false;
+    response.message = e.cause.err.message;
   } finally {
-    return {
-      ok,
-      message,
-    } as AuthActionResponse;
+    return response;
   }
 }
 
@@ -49,7 +52,7 @@ export async function SignInByOAuthAction(params: SignInParams) {
 }
 
 export async function SignUpAction(formData: FormData) {
-  let response: AuthActionResponse = {
+  const response: AuthActionResponse = {
     ok: true,
     message: "회원가입되었습니다",
   };
@@ -70,7 +73,7 @@ type FindUserEmailParams = {
 };
 
 export async function FindUserEmail(params: FindUserEmailParams) {
-  let response: AuthActionResponse = {
+  const response: AuthActionResponse = {
     ok: true,
     message: "이메일이 확인되었습니다",
     data: null,
@@ -91,15 +94,23 @@ export async function FindUserEmail(params: FindUserEmailParams) {
 }
 
 export async function SendPasswordRestEmail(email: string) {
-  let response: AuthActionResponse = {
+  const response: AuthActionResponse = {
     ok: true,
     message: "이메일이 발송되었습니다.",
   };
   try {
-    await checkEmail(email);
+    const user = await findUserByEmail(email);
+    if (!user) throw new Error("이메일을 확인해주세요.");
 
-    // 인증 토큰 생성
-    const token: string = await generatePasswordResetToken(email);
+    // 소셜 로그인으로 연동되어있는지 확인
+    if (await checkUserHasLinkedProvider(user.id))
+      throw new Error("소셜 로그인으로 가입된 이메일입니다.");
+
+    // 인증 값 생성
+    const verifyValue: string = await generatePasswordResetVerification(
+      email,
+      "MAIL",
+    );
 
     // 이메일 발송
   } catch (e: any) {
@@ -110,8 +121,11 @@ export async function SendPasswordRestEmail(email: string) {
   }
 }
 
-export async function CheckPasswordResetToken(token: string) {
-  let response: AuthActionResponse = {
+export async function VerifyPasswordResetValue(
+  value: string,
+  sendMethod: SendMethod,
+) {
+  const response: AuthActionResponse = {
     ok: true,
     message: "인증되었습니다.",
   };

@@ -1,20 +1,11 @@
-import { prisma } from "@/prisma";
-
-import { Provider, getValue } from "@/types/provider";
+import { Provider, SendMethod } from "@/types/common";
 
 import { EMAIL_RULE, PASSWORD_RULE, PHONE_RULE } from "@/utils/validator";
 import { comparePassword, encryptPassword } from "@/utils/password";
 import { generateRandomText, maskingValue } from "@/utils/common";
 
-type SignInRequest = {
-  email: string;
-  password: string;
-};
-
-const INVALID_EMAIL_MESSAGE: string = "이메일 형식이 유효하지 않습니다";
-const INVALID_PASSWORD_MESSAGE: string =
-  "비밀번호는 영문자, 숫자, 특수문자를 포함 최소 8~20자로 입력해주세요";
-const SIGN_IN_MESSAGE: string = "이메일 또는 비밀번호를 확인해주세요";
+import { prisma } from "@/prisma";
+import { User } from "@prisma/client";
 
 /**
  * 로그인 기록 생성
@@ -28,13 +19,14 @@ async function generateLoginAccessLog() {
  * @param params
  * @returns
  */
-export async function getAuthUser(params: SignInRequest) {
-  const { email, password } = params;
+export async function getAuthUser(email: string, password: string) {
+  await checkEmail(email, "NONE");
+  if (!PASSWORD_RULE.test(password))
+    throw new Error(
+      "비밀번호는 영문자, 숫자, 특수문자를 포함 최소 8~20자로 입력해주세요",
+    );
 
-  if (!EMAIL_RULE.test(email)) throw new Error(INVALID_EMAIL_MESSAGE);
-  if (!PASSWORD_RULE.test(password)) throw new Error(INVALID_PASSWORD_MESSAGE);
-
-  let user: any = await prisma.user.findFirst({
+  const user: any = await prisma.user.findFirst({
     where: {
       email,
     },
@@ -42,7 +34,7 @@ export async function getAuthUser(params: SignInRequest) {
 
   // 사용자가 없거나 비밀번호가 일치하지 않으면
   if (!user || !comparePassword(password, user.password))
-    throw new Error(SIGN_IN_MESSAGE);
+    throw new Error("이메일 또는 비밀번호를 확인해주세요.");
 
   // password 제거
   delete user.password;
@@ -55,7 +47,7 @@ export async function getAuthUser(params: SignInRequest) {
  * @param email
  * @returns
  */
-export async function findUserByEmail(email: string) {
+export async function findUserByEmail(email: string): Promise<User | null> {
   return await prisma.user.findFirst({ where: { email } });
 }
 
@@ -67,7 +59,7 @@ export async function findUserByEmail(email: string) {
  */
 export async function checkUserHasLinkedProvider(
   userId: number,
-  provider?: string,
+  provider?: Provider,
 ): Promise<boolean> {
   let whereQuery: any = {
     userId,
@@ -75,56 +67,76 @@ export async function checkUserHasLinkedProvider(
   if (provider) {
     whereQuery = {
       ...whereQuery,
-      ...{ provider: getValue(provider.toUpperCase()) },
+      ...{ provider },
     };
   }
   return (await prisma.linkedProvider.findFirst({ where: whereQuery })) != null;
 }
 
 /**
+ * Check 기능 유형
+ */
+type CheckType = "EXIST" | "NOT_EXIST" | "NONE";
+
+/**
  * 동일 이메일 체크 및 형식 확인
  * @param email
- * @param isSignUp
+ * @param checkType
  */
 export async function checkEmail(
   email: string | null,
-  isSignUp: boolean = false,
-) {
-  if (!email) throw new Error("이메일을 입력해주세요");
+  checkType: CheckType,
+): Promise<void> {
+  if (!email) throw new Error("이메일을 입력해주세요.");
   if (!EMAIL_RULE.test(email))
     throw new Error("올바른 이메일 형식이 아닙니다.");
-  if (isSignUp && (await findUserByEmail(email)))
-    throw new Error("이미 가입되거나 소셜 로그인에 연동된 이메일입니다");
+  if (checkType != "NONE") {
+    if (checkType === "EXIST" && (await findUserByEmail(email)))
+      throw new Error("이미 가입된 이메일입니다.");
+    if (checkType === "NOT_EXIST" && !(await findUserByEmail(email)))
+      throw new Error("가입되지 않은 이메일입니다.");
+  }
 }
 
 /**
  * 동일 전화번호 체크 및 형식 확인
  * @param mobilePhone
- * @param isSignUp
+ * @param checkType
  */
 export async function checkMobilePhone(
   mobilePhone: string | null,
-  isSignUp: boolean = false,
-) {
-  if (!mobilePhone) throw new Error("전화번호를 입력해주세요");
+  checkType: CheckType = "NONE",
+): Promise<void> {
+  if (!mobilePhone) throw new Error("전화번호를 입력해주세요.");
   if (!PHONE_RULE.test(mobilePhone))
-    throw new Error("올바른 전화번호 형식이 아닙니다");
-  if (
-    isSignUp &&
-    (await prisma.user.findFirst({
-      where: { mobilePhone },
-    }))
-  )
-    throw new Error("이미 가입된 전화번호입니다");
+    throw new Error("올바른 전화번호 형식이 아닙니다.");
+  if (checkType != "NONE") {
+    if (
+      checkType === "EXIST" &&
+      (await prisma.user.findFirst({
+        where: { mobilePhone },
+      }))
+    ) {
+      throw new Error("이미 가입된 전화번호입니다.");
+    }
+    if (
+      checkType === "NOT_EXIST" &&
+      !(await prisma.user.findFirst({
+        where: { mobilePhone },
+      }))
+    ) {
+      throw new Error("가입되지 않은 전화번호입니다.");
+    }
+  }
 }
 
 /**
  * 유저 생성
  * @param body
  */
-export async function createUser(formData: FormData) {
-  await checkEmail(formData.get("email") as string, true);
-  await checkMobilePhone(formData.get("mobilePhone") as string, true);
+export async function createUser(formData: FormData): Promise<void> {
+  await checkEmail(formData.get("email") as string, "EXIST");
+  await checkMobilePhone(formData.get("mobilePhone") as string, "EXIST");
 
   const name: string = formData.get("name") as string;
   const email: string = formData.get("email") as string;
@@ -149,9 +161,9 @@ export async function createUser(formData: FormData) {
 
     // 2. 계정 연동이 있으면 linkedProvider 테이블에 기록
     if (provider) {
-      const currentProvider: Provider = getValue(provider);
+      const currentProvider: Provider = provider as Provider;
 
-      if (!currentProvider) throw new Error("유효하지 않은 계정 연동입니다");
+      if (!currentProvider) throw new Error("유효하지 않은 계정 연동입니다.");
 
       await prisma.linkedProvider.create({
         data: {
@@ -163,6 +175,12 @@ export async function createUser(formData: FormData) {
   });
 }
 
+/**
+ * 이름과 전화번호로 사용자 조회
+ * @param name
+ * @param mobilePhone
+ * @returns
+ */
 export async function findEmailByNameAndMobilePhone(
   name: string,
   mobilePhone: string,
@@ -171,42 +189,56 @@ export async function findEmailByNameAndMobilePhone(
   hasProvider: boolean;
 }> {
   // 이름과 전화번호로 이메일, 아이디 찾기
-  const res = await prisma.user.findFirst({
+  const userInfo = await prisma.user.findFirst({
     select: { id: true, email: true },
     where: { name, mobilePhone },
   });
-  if (!res) throw new Error("이름 또는 전화번호를 확인해주세요");
-  let [head, email]: string[] = res.email.split("@");
+  if (!userInfo) throw new Error("이름 또는 전화번호를 확인해주세요.");
+  let [head, email]: string[] = userInfo.email.split("@");
   return {
     email: maskingValue(head, false, 50) + "@" + email, // 마스킹 뒤에서 50%
-    hasProvider: await checkUserHasLinkedProvider(res.id), // OAuth 로그인 연동 되어있는지 확인
+    hasProvider: await checkUserHasLinkedProvider(userInfo.id), // OAuth 로그인 연동 되어있는지 확인
   };
 }
 
-export async function generatePasswordResetToken(email: string) {
+/**
+ * 이메일 인증 값 생성 or 갱신
+ * @param email
+ * @returns
+ */
+export async function generatePasswordResetVerification(
+  email: string,
+  sendMethod: SendMethod,
+): Promise<string> {
+  // 사용자 정보
   const user = await findUserByEmail(email);
-
-  if (!user) throw new Error("이메일을 확인해주세요");
-
+  // 현재 시간
   const currentTime: number = new Date().getTime();
-  const token = "TOKEN_VALUE"; //TODO 인증 토큰 뭘로 만들어야 하지?
+  // 인증 값 (난수 64자)
+  const value: string = generateRandomText(64);
 
   await prisma.$transaction(async (prisma) => {
-    await prisma.passwordRestToken.upsert({
-      where: { userId_validType: { userId: user.id, validType: "MAIL" } },
+    await prisma.passwordResetVerification.upsert({
+      where: {
+        userId_sendMethod: {
+          userId: user!.id,
+          sendMethod,
+        },
+      },
       update: {
-        token,
+        value,
         createdAt: new Date(currentTime),
-        expiredAt: new Date(currentTime + 60 * 60 * 1000),
+        expiredAt: new Date(currentTime + 60 * 60 * 1000), // 1시간
       },
       create: {
-        userId: user.id,
-        validType: "MAIL",
-        token,
+        userId: user!.id,
+        sendMethod,
+        value,
         createdAt: new Date(currentTime),
-        expiredAt: new Date(currentTime + 60 * 60 * 1000),
+        expiredAt: new Date(currentTime + 60 * 60 * 1000), // 1시간
       },
     });
   });
-  return token;
+
+  return value;
 }

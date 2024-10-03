@@ -131,7 +131,7 @@ export default function SignUp() {
           }}
         />
         <Input
-          inputType="text"
+          inputType="tel"
           inputValue={mobilePhone}
           onChange={setMobilePhone}
           labelText="휴대전화번호"

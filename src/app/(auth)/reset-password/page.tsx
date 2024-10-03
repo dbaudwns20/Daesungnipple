@@ -13,7 +13,7 @@ import { useSearchParams } from "next/navigation";
 import Input, { type InputType } from "@/components/input/input";
 import Button, { type ButtonType } from "@/components/button/button";
 
-import { CheckPasswordResetToken } from "@/actions/auth.actions";
+import { VerifyPasswordResetValue } from "@/actions/auth.actions";
 import { forceRedirect } from "@/actions";
 
 import { PASSWORD_RULE, validateForm } from "@/utils/validator";
@@ -44,7 +44,7 @@ export default function ResetPassword() {
       showToast({ message: "인증 토큰이 유효하지 않습니다." });
       forceRedirect("/sign-in", "replace");
     } else {
-      const res = await CheckPasswordResetToken(token);
+      const res = await VerifyPasswordResetValue(token, "MAIL");
       if (!res.ok) {
         showToast({ message: res.message });
         forceRedirect("/sign-in", "replace");
@@ -53,7 +53,9 @@ export default function ResetPassword() {
   }, [token]);
 
   useEffect(() => {
-    checkTokenIsValid();
+    setTimeout(async () => {
+      await checkTokenIsValid();
+    });
   }, [checkTokenIsValid]);
 
   useEffect(() => {
@@ -109,7 +111,27 @@ export default function ResetPassword() {
           </form>
         </>
       ) : (
-        <p>확인 중</p>
+        <div className="flex h-full w-full items-center justify-center">
+          <svg
+            className="-ml-1 mr-3 h-12 w-12 animate-spin text-gray-500"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-20"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-65"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
+          </svg>
+          <p className="text-gray-800">토큰 확인중...</p>
+        </div>
       )}
     </div>
   );

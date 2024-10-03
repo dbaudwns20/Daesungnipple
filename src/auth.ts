@@ -1,9 +1,13 @@
+import { Provider } from "@/types/common";
+
+import { User } from "@prisma/client";
+
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import Kakao from "next-auth/providers/kakao";
 import Naver from "next-auth/providers/naver";
 import Credentials from "next-auth/providers/credentials";
-import type { Provider } from "next-auth/providers";
+import type { Provider as AuthProvider } from "next-auth/providers";
 
 import {
   getAuthUser,
@@ -11,23 +15,23 @@ import {
   checkUserHasLinkedProvider,
 } from "@/services/auth.service";
 
-const providerMap: Map<string, Provider> = new Map<string, Provider>([
+const providerMap: Map<string, AuthProvider> = new Map<string, AuthProvider>([
   ["GOOGLE", Google],
   ["NAVER", Naver],
   ["KAKAO", Kakao],
 ]);
 
-const providers: Provider[] = [
+const providers: AuthProvider[] = [
   Credentials({
     credentials: {
       email: { label: "Email", type: "email" },
       password: { label: "Password", type: "password" },
     },
     authorize: async (credentials) => {
-      const user = await getAuthUser({
-        email: credentials.email as string,
-        password: credentials.password as string,
-      });
+      const user = await getAuthUser(
+        credentials.email as string,
+        credentials.password as string,
+      )!;
 
       // 기본 로그인 시 해당 이메일이 OAuth 계정으로 연동 되어있는지 체크
       if (await checkUserHasLinkedProvider(user!.id)) {
@@ -41,7 +45,7 @@ const providers: Provider[] = [
   }),
 ];
 
-function setProviders(): Provider[] {
+function setProviders(): AuthProvider[] {
   const envProviders: string[] =
     process.env.NEXT_PUBLIC_AUTH_PROVIDERS!.split("|");
   envProviders.forEach((provider) => {
@@ -98,7 +102,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async signIn({ user, account, profile }) {
       // provider (google, kakao, naver)
-      const provider: string = account!.provider;
+      const provider: string = account!.provider.toUpperCase();
 
       // 이메일로 DB 사용자 정보 가져오기
       const dbUser = await findUserByEmail(user.email!);
@@ -106,13 +110,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // 가입된 이용자가 아니라면 회원가입 페이지로 이동시킨다
       if (!dbUser)
         return encodeURI(
-          `/sign-up?email=${user!.email}&image=${user!.image}&provider=${provider.toUpperCase()}`,
+          `/sign-up?email=${user!.email}&image=${user!.image}&provider=${provider}`,
         );
 
       // OAuth 로그인 시 해당 이메일이 기존 회원가입 되어있는지 체크
       if (
-        provider != "credentials" &&
-        !(await checkUserHasLinkedProvider(dbUser!.id, provider))
+        provider != "CREDENTIALS" &&
+        !(await checkUserHasLinkedProvider(dbUser!.id, provider as Provider))
       )
         return encodeURI(
           `/sign-in/error?error_message=이미 회원가입 된 이메일입니다\n기본 로그인을 이용해 주세요`,
