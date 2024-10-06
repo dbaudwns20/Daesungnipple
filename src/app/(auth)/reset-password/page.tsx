@@ -13,20 +13,29 @@ import { useSearchParams } from "next/navigation";
 import Input, { type InputType } from "@/components/input/input";
 import Button, { type ButtonType } from "@/components/button/button";
 
-import { VerifyPasswordResetValue } from "@/actions/auth.actions";
+import {
+  VerifyPasswordResetValue,
+  ResetNewPassword,
+} from "@/actions/auth.actions";
 import { forceRedirect } from "@/actions";
 
 import { PASSWORD_RULE, validateForm } from "@/utils/validator";
 import { showToast } from "@/utils/message";
 
+type VerifyPasswordResetValueResData = {
+  verification: string;
+};
+
 export default function ResetPassword() {
   const searchParams = useSearchParams();
-  const token: string | null = searchParams.get("token");
+  const value: string | null = searchParams.get("value");
 
   const passwordRef = useRef<InputType>(null);
   const submitRef = useRef<ButtonType>(null);
 
   const [isValid, setIsValid] = useState<boolean>(false);
+  const [resData, setResData] =
+    useState<VerifyPasswordResetValueResData | null>(null);
   const [password, setPassword] = useState<string>("");
   const [passwordCheck, setPasswordCheck] = useState<string>("");
   const [isFetching, startTransition] = useTransition();
@@ -36,27 +45,38 @@ export default function ResetPassword() {
 
     // 입력값 체크
     if (!validateForm(e.target as HTMLFormElement)) return;
-    startTransition(async () => {});
+
+    startTransition(async () => {
+      ResetNewPassword(resData!.verification, password, "MAIL").then((res) => {
+        showToast({ message: res.message });
+        if (res.ok) {
+          forceRedirect("/sign-in", "replace");
+        }
+      });
+    });
   };
 
-  const checkTokenIsValid = useCallback(async () => {
-    if (!token) {
-      showToast({ message: "인증 토큰이 유효하지 않습니다." });
+  const checkValueIsValid = useCallback(async () => {
+    if (!value) {
+      showToast({ message: "인증이 유효하지 않습니다." });
       forceRedirect("/sign-in", "replace");
     } else {
-      const res = await VerifyPasswordResetValue(token, "MAIL");
+      const res = await VerifyPasswordResetValue(value, "MAIL");
       if (!res.ok) {
         showToast({ message: res.message });
         forceRedirect("/sign-in", "replace");
-      } else setIsValid(true);
+      } else {
+        setResData(res.data as VerifyPasswordResetValueResData);
+        setIsValid(true);
+      }
     }
-  }, [token]);
+  }, [value]);
 
   useEffect(() => {
     setTimeout(async () => {
-      await checkTokenIsValid();
+      await checkValueIsValid();
     });
-  }, [checkTokenIsValid]);
+  }, [checkValueIsValid]);
 
   useEffect(() => {
     if (isValid) passwordRef.current?.setFocus();
@@ -67,7 +87,7 @@ export default function ResetPassword() {
       {isValid ? (
         <>
           <h1 className="mb-7 text-center text-2xl font-bold">
-            비밀번호 초기화
+            비밀번호 재설정
           </h1>
           <form className="w-full" onSubmit={handleSubmit} noValidate>
             <Input
@@ -130,7 +150,7 @@ export default function ResetPassword() {
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
             />
           </svg>
-          <p className="text-gray-800">토큰 확인중...</p>
+          <p className="text-gray-800">확인중...</p>
         </div>
       )}
     </div>

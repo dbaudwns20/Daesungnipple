@@ -4,6 +4,8 @@ import { checkFormData, checkParams } from "@/actions";
 
 import { SendMethod } from "@/types/common";
 
+import { sendPasswordResetMail } from "@/utils/mail";
+
 import {
   createUser,
   checkMobilePhone,
@@ -11,6 +13,8 @@ import {
   generatePasswordResetVerification,
   checkUserHasLinkedProvider,
   findUserByEmail,
+  verifyPasswordResetValue,
+  updateUserPassword,
 } from "@/services/auth.service";
 
 import { signIn } from "@/auth";
@@ -67,12 +71,10 @@ export async function SignUpAction(formData: FormData) {
   }
 }
 
-type FindUserEmailParams = {
+export async function FindUserEmail(params: {
   name: string;
   mobilePhone: string;
-};
-
-export async function FindUserEmail(params: FindUserEmailParams) {
+}) {
   const response: AuthActionResponse = {
     ok: true,
     message: "이메일이 확인되었습니다",
@@ -96,7 +98,7 @@ export async function FindUserEmail(params: FindUserEmailParams) {
 export async function SendPasswordRestEmail(email: string) {
   const response: AuthActionResponse = {
     ok: true,
-    message: "이메일이 발송되었습니다.",
+    message: "이메일이 발송되었습니다.\n이메일을 확인해주세요.",
   };
   try {
     const user = await findUserByEmail(email);
@@ -112,7 +114,8 @@ export async function SendPasswordRestEmail(email: string) {
       "MAIL",
     );
 
-    // 이메일 발송
+    // 비밀번호 초기화 이메일 발송
+    await sendPasswordResetMail(email, verifyValue);
   } catch (e: any) {
     response.ok = false;
     response.message = e.message;
@@ -121,6 +124,12 @@ export async function SendPasswordRestEmail(email: string) {
   }
 }
 
+/**
+ * 비밀번호 초기화 인증값 확인
+ * @param value
+ * @param sendMethod
+ * @returns
+ */
 export async function VerifyPasswordResetValue(
   value: string,
   sendMethod: SendMethod,
@@ -130,6 +139,40 @@ export async function VerifyPasswordResetValue(
     message: "인증되었습니다.",
   };
   try {
+    if (!value) throw new Error("인증이 유효하지 않습니다.");
+    // 값 유요한지 확인
+    const verification: string = await verifyPasswordResetValue(
+      value,
+      sendMethod,
+    );
+    response.data = { verification };
+  } catch (e: any) {
+    response.ok = false;
+    response.message = e.message;
+  } finally {
+    return response;
+  }
+}
+
+/**
+ * 비밀번호 초기화
+ * @param userId
+ * @param newPassword
+ * @param sendMethod
+ * @returns
+ */
+export async function ResetNewPassword(
+  userId: string,
+  newPassword: string,
+  sendMethod: SendMethod,
+) {
+  const response: AuthActionResponse = {
+    ok: true,
+    message: "비밀번호가 변경되었습니다.",
+  };
+  try {
+    // 비밀번호 업데이트
+    await updateUserPassword(userId, newPassword, sendMethod);
   } catch (e: any) {
     response.ok = false;
     response.message = e.message;

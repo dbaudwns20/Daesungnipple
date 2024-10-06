@@ -58,7 +58,7 @@ export async function findUserByEmail(email: string): Promise<User | null> {
  * @returns
  */
 export async function checkUserHasLinkedProvider(
-  userId: number,
+  userId: string,
   provider?: Provider,
 ): Promise<boolean> {
   let whereQuery: any = {
@@ -241,4 +241,68 @@ export async function generatePasswordResetVerification(
   });
 
   return value;
+}
+
+export async function verifyPasswordResetValue(
+  value: string,
+  sendMethod: SendMethod,
+): Promise<string> {
+  const verify = await prisma.passwordResetVerification.findFirst({
+    where: { value, sendMethod },
+  });
+
+  if (!verify) throw new Error("인증이 유효하지 않습니다.");
+
+  if (verify.expiredAt < new Date()) {
+    // 인증 값 지우기
+    await prisma.$transaction(async (prisma) => {
+      await prisma.passwordResetVerification.delete({
+        where: {
+          userId_sendMethod: { userId: verify.userId, sendMethod: sendMethod },
+        },
+      });
+    });
+    throw new Error(
+      "인증시간이 만료되었습니다.\n비밀번호 초기화 인증을 다시 시도해주세요.",
+    );
+  }
+
+  return verify.userId;
+}
+
+export async function updateUserPassword(
+  userId: string, // Auth Session으로 현재 로그인 상태인지 확인 필요
+  newPassword: string,
+  sendMethod?: SendMethod,
+) {
+  if (!PASSWORD_RULE.test(newPassword))
+    throw new Error(
+      "비밀번호는 영문자, 숫자, 특수문자를 포함 최소 8~20자로 입력해주세요",
+    );
+
+  // 사용자 조회
+  const user = await prisma.user.findFirst({ where: { id: userId } });
+  if (!user) throw new Error("계정 정보를 찾을 수 없습니다.");
+
+  // 이전 비밀번호와 비교
+  // TODO 변경 히스토리를 기록해여 조건에 따라 비교 (ex: 3개월, 1년, 아예 안하거나)
+  if (comparePassword(newPassword, user.password)) {
+    throw new Error("이전에 사용했던 비밀번호는 사용할 수 없습니다.");
+  }
+
+  prisma.$transaction(async (prisma) => {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { password: encryptPassword(newPassword) },
+    });
+
+    // 발송 방식이 있다면 인증 데이터 제거
+    if (sendMethod) {
+      await prisma.passwordResetVerification.delete({
+        where: { userId_sendMethod: { userId, sendMethod } },
+      });
+    }
+
+    // 변경로그 기록
+  });
 }
