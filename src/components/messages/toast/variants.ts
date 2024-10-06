@@ -12,7 +12,7 @@ export type ToastSizeType = "xs" | "sm" | "md" | "lg" | "xl";
 
 export const ToastVariants = cva(
   `absolute
-   bottom-[20%]
+   bottom-[10%]
    left-1/2
    z-40
    h-auto
