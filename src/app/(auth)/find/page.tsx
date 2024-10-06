@@ -20,7 +20,7 @@ import { forceRedirect } from "@/actions";
 import { EMAIL_RULE, PHONE_RULE, validateForm } from "@/utils/validator";
 import { showToast } from "@/utils/message";
 
-type FindEmailResult = {
+type FindUserEmailResData = {
   email: string;
   hasProvider: boolean;
 };
@@ -35,8 +35,7 @@ export default function Find() {
   // values
   let target: string = searchParams.get("target")!;
 
-  const [findEmailResult, setFindEmailResult] =
-    useState<FindEmailResult | null>(null);
+  const [resData, setResData] = useState<FindUserEmailResData | null>(null);
   const [findPasswordResult, setFindPasswordResult] = useState<boolean>(false);
   const [email, setEmail] = useState<string>("");
   const [name, setName] = useState<string>("");
@@ -45,7 +44,7 @@ export default function Find() {
   const [isFetching, startTransition] = useTransition();
 
   const initValues = useCallback(() => {
-    setFindEmailResult(null);
+    setResData(null);
     setFindPasswordResult(false);
     setEmail("");
     setName("");
@@ -61,7 +60,7 @@ export default function Find() {
     if (target === "email") {
       startTransition(async () => {
         FindUserEmail({ name, mobilePhone }).then((res) => {
-          if (res.ok) setFindEmailResult(res.data as FindEmailResult);
+          if (res.ok) setResData(res.data as FindUserEmailResData);
           else showToast({ message: res.message });
         });
       });
@@ -139,7 +138,7 @@ export default function Find() {
             ) : (
               <div className="text-center font-semibold text-gray-700">
                 <div className="mb-7">
-                  <p className="mb-5 font-bold text-blue-500">{email}</p>
+                  <p className="mb-5 font-bold text-green-600">{email}</p>
                   입력된 메일로 비밀번호 초기화 이메일을 발송했습니다.
                   <br />
                   이메일을 확인해주세요.
@@ -152,7 +151,7 @@ export default function Find() {
           </>
         ) : (
           <>
-            {!findEmailResult ? (
+            {!resData ? (
               <>
                 <Input
                   ref={nameRef}
@@ -189,15 +188,15 @@ export default function Find() {
               </>
             ) : (
               <div className="text-center font-semibold text-gray-700">
-                <p className={findEmailResult.hasProvider ? "mb-7" : "mb-10"}>
+                <p className={resData.hasProvider ? "mb-7" : "mb-10"}>
                   <span className="font-bold text-blue-500">{name}</span> 님의
                   이메일은{" "}
                   <span className="font-bold text-green-600">
-                    {findEmailResult.email}
+                    {resData.email}
                   </span>{" "}
                   입니다.
                 </p>
-                {findEmailResult.hasProvider ? (
+                {resData.hasProvider ? (
                   <p className="mb-7 rounded-lg border border-gray-300 py-3 text-sm font-bold text-blue-500">
                     소셜 로그인으로 가입된 계정입니다.
                     <br />
