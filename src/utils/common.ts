@@ -88,3 +88,11 @@ export function numberToKorean(num: number): string {
 
   return result;
 }
+
+/**
+ * 지정된 시간(ms)만큼 대기
+ * @param ms
+ */
+export function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}

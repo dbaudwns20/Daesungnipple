@@ -1,11 +1,25 @@
+"use server";
+
 import { NextRequest, NextResponse } from "next/server";
 
-import { prisma } from "@/prisma";
+import type { ProductListOption } from "@/types/product";
+import { listProduct } from "@/services/product";
+import { delay } from "@/utils/common";
 
 export async function GET(request: NextRequest) {
-  const user = await prisma.user.findMany();
+  const searchParams = request.nextUrl.searchParams;
+  const listOption: ProductListOption = {
+    name: searchParams.get("name") || "",
+    categoryId: searchParams.get("categoryId") ? parseInt(searchParams.get("categoryId") || "0", 10) : null,
+    page: parseInt(searchParams.get("page") || "1", 10), // 기본값 1
+    unit: parseInt(searchParams.get("unit") || "10", 10) // 기본값 10
+  };
 
-  const res = JSON.parse(JSON.stringify(user));
+  // TODO isLoading 테스트
+  // await delay(3000)
 
-  return NextResponse.json(res);
+  let list = await listProduct(listOption);
+  if (!list) list = [];
+
+  return NextResponse.json(list);
 }
