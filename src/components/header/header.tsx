@@ -13,7 +13,7 @@ export default function MainHeader(props: HeaderProps) {
   const { session } = props;
 
   return (
-    <header className="flex h-12 items-center justify-between bg-black px-5 text-white">
+    <header className="flex h-12 items-center justify-between p-4 bg-gray-400">
       <div>
         <Link href="/">Home</Link>
       </div>

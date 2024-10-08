@@ -46,3 +46,45 @@ export function maskingValue(
     return value.substring(0, value.length - index) + "*".repeat(index);
   }
 }
+
+/**
+ * 숫자를 3자리 단위로 콤마(,)를 찍어서 반환
+ * @param num
+ */
+export function addComma(num: number): string {
+  return new Intl.NumberFormat().format(num);
+}
+
+/**
+ * 숫자를 한글로 변환
+ * @param num
+ * @returns string
+ */
+export function numberToKorean(num: number): string {
+  const units = ["", "만", "억", "조", "경"];
+  const smallUnits = ["", "십", "백", "천"];
+  const numbers = ["", "일", "이", "삼", "사", "오", "육", "칠", "팔", "구"];
+
+  if (num === 0) return "영";
+
+  let result = "";
+  let unitIndex = 0;
+
+  while (num > 0) {
+    const part = num % 10000;
+    if (part > 0) {
+      let partStr = "";
+      for (let i = 0; i < 4; i++) {
+        const digit = Math.floor(part / Math.pow(10, i)) % 10;
+        if (digit > 0) {
+          partStr = numbers[digit] + smallUnits[i] + partStr;
+        }
+      }
+      result = partStr + units[unitIndex] + result;
+    }
+    num = Math.floor(num / 10000);
+    unitIndex++;
+  }
+
+  return result;
+}

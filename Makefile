@@ -33,7 +33,7 @@ pull:
 .PHONY: generate
 generate:
 	@echo "Generating Prisma client..."
-	@prisma generate --schema=./prisma/schema.prisma
+	@npx prisma generate --schema=./prisma/schema.prisma
 
 # 디비 도커로 실행시키고 프리즈마 스키마 마이그레이션
 # 디비 띄우고 바로 마이그레이션 하면 디비가 준비되기 전에 마이그레이션을 실행할 수 있으므로 15초 대기
