@@ -119,7 +119,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         !(await checkUserHasLinkedProvider(dbUser!.id, provider as Provider))
       )
         return encodeURI(
-          `/sign-in/error?error_message=이미 회원가입 된 이메일입니다\n기본 로그인을 이용해 주세요`,
+          `/sign-in/error?error_message=이미 회원가입 된 이메일입니다.\n기본 로그인을 이용해 주세요.`,
         );
 
       return true;

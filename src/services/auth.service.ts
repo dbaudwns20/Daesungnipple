@@ -5,7 +5,7 @@ import { comparePassword, encryptPassword } from "@/utils/password";
 import { generateRandomText, maskingValue } from "@/utils/common";
 
 import { prisma } from "@/prisma";
-import { User } from "@prisma/client";
+import { PasswordUpdateLog, User } from "@prisma/client";
 
 /**
  * 로그인 기록 생성
@@ -146,20 +146,22 @@ export async function createUser(formData: FormData): Promise<void> {
   const image: string | null = (formData.get("image") as string) ?? null;
   const provider: string | null = (formData.get("provider") as string) ?? null;
 
+  const encryptedPassword: string = encryptPassword(password);
+
   // 트랜잭션을 사용하여 데이터베이스 작업을 묶음 처리
   await prisma.$transaction(async (prisma) => {
-    // 1. 사용자 생성
+    // 사용자 생성
     const user = await prisma.user.create({
       data: {
         name,
         email,
-        password: encryptPassword(password),
+        password: encryptedPassword,
         mobilePhone,
         image,
       },
     });
 
-    // 2. 계정 연동이 있으면 linkedProvider 테이블에 기록
+    // 계정 연동이 있으면 linkedProvider 테이블에 기록
     if (provider) {
       const currentProvider: Provider = provider as Provider;
 
@@ -169,6 +171,14 @@ export async function createUser(formData: FormData): Promise<void> {
         data: {
           userId: user.id,
           provider: currentProvider,
+        },
+      });
+    } else {
+      // 비밀번호 변경 로그 기록 (연동이 아닌 경우에만 생성)
+      await prisma.passwordUpdateLog.create({
+        data: {
+          userId: user.id,
+          password: encryptedPassword,
         },
       });
     }
@@ -284,16 +294,47 @@ export async function updateUserPassword(
   const user = await prisma.user.findFirst({ where: { id: userId } });
   if (!user) throw new Error("계정 정보를 찾을 수 없습니다.");
 
-  // 이전 비밀번호와 비교
-  // TODO 변경 히스토리를 기록해여 조건에 따라 비교 (ex: 3개월, 1년, 아예 안하거나)
-  if (comparePassword(newPassword, user.password)) {
-    throw new Error("이전에 사용했던 비밀번호는 사용할 수 없습니다.");
+  let passwordUpdateLogs: PasswordUpdateLog[] =
+    await prisma.passwordUpdateLog.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+    });
+
+  let garbageLogIds: number[] = [];
+
+  // 로그의 갯수가 4개 이상 인 경우
+  while (passwordUpdateLogs.length > 3) {
+    let log: PasswordUpdateLog = passwordUpdateLogs.pop()!;
+    garbageLogIds.push(log.id);
   }
+
+  // 이전 비밀번호와 비교
+  passwordUpdateLogs.forEach((it: PasswordUpdateLog) => {
+    if (comparePassword(newPassword, it.password)) {
+      throw new Error("최근 사용했던 비밀번호는 사용할 수 없습니다.");
+    }
+  });
+
+  const encryptedPassword: string = encryptPassword(newPassword);
 
   prisma.$transaction(async (prisma) => {
     await prisma.user.update({
       where: { id: userId },
-      data: { password: encryptPassword(newPassword) },
+      data: { password: encryptedPassword },
+    });
+
+    // 가비지 데이터 처리
+    if (garbageLogIds.length > 0)
+      await prisma.passwordUpdateLog.deleteMany({
+        where: { id: { in: garbageLogIds } },
+      });
+
+    // 비밀번호 변경 로그 생성
+    await prisma.passwordUpdateLog.create({
+      data: {
+        userId: user.id,
+        password: encryptedPassword,
+      },
     });
 
     // 발송 방식이 있다면 인증 데이터 제거
@@ -302,7 +343,5 @@ export async function updateUserPassword(
         where: { userId_sendMethod: { userId, sendMethod } },
       });
     }
-
-    // 변경로그 기록
   });
 }

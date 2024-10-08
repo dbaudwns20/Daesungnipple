@@ -33,7 +33,7 @@ export default function AuthErrorPage() {
   });
 
   return (
-    <div className="flex h-full w-full items-center justify-center">
+    <div className="flex h-[320px] w-full items-center justify-center">
       <svg
         className="-ml-1 mr-3 h-12 w-12 animate-spin text-gray-500"
         viewBox="0 0 24 24"
