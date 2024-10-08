@@ -13,9 +13,10 @@ export default function MainHeader(props: HeaderProps) {
   const { session } = props;
 
   return (
-    <header className="flex h-12 items-center justify-between p-4 bg-gray-400">
-      <div>
+    <header className="flex h-12 items-center justify-between bg-black p-4">
+      <div className="inline-flex gap-4 text-white">
         <Link href="/">Home</Link>
+        <Link href="/products">상품</Link>
       </div>
       <div className="flex gap-2">
         {session ? (
