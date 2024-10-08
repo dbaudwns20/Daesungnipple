@@ -29,9 +29,10 @@ export default function SignIn() {
     if (!validateForm(e.target as HTMLFormElement)) return;
 
     startTransition(async () => {
-      const res = await SignInAction({ email, password });
-      showToast({ message: res.message });
-      if (res.ok) router.replace("/");
+      SignInAction({ email, password }).then((res) => {
+        if (res.ok) router.replace("/");
+        else showToast({ message: res.message });
+      });
     });
   };
 
@@ -40,7 +41,7 @@ export default function SignIn() {
   }, []);
 
   return (
-    <div className="rounded-lg p-12 sm:w-full md:w-1/2 lg:w-1/3">
+    <div className="p-12">
       <h1 className="mb-7 text-center text-2xl font-bold">로그인</h1>
       <form className="w-full" onSubmit={handleSubmit} noValidate>
         <Input
@@ -75,19 +76,20 @@ export default function SignIn() {
           로그인
         </Button>
       </form>
-      <div className="mt-3 flex w-full items-center justify-end gap-1 font-semibold text-gray-400">
-        <Link className="text-sm hover:text-blue-400" href="/sign-up">
-          회원가입
+      <OAuthProviders />
+      <div className="mt-5 flex w-full items-center justify-center gap-1.5 font-semibold text-gray-500">
+        <Link className="hover:text-blue-400" href="/find?target=email">
+          이메일 찾기
         </Link>
         ·
-        <Link className="text-sm hover:text-blue-400" href="/find-password">
+        <Link className="hover:text-blue-400" href="/find?target=password">
           비밀번호 찾기
         </Link>
+        ·
+        <Link className="hover:text-blue-400" href="/sign-up">
+          회원가입
+        </Link>
       </div>
-      <div className="flex items-center py-5 text-xs uppercase text-gray-400 before:me-4 before:flex-1 before:border-t before:border-gray-200 after:ms-4 after:flex-1 after:border-t after:border-gray-200 dark:text-neutral-500 dark:before:border-neutral-600 dark:after:border-neutral-600">
-        다른 계정으로 로그인
-      </div>
-      <OAuthProviders />
     </div>
   );
 }

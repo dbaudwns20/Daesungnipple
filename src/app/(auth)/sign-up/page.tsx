@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useRef, useEffect, useTransition, FormEvent } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 import Input, { type InputType } from "@/components/input/input";
 import Button, { type ButtonType } from "@/components/button/button";
 
 import { SignUpAction } from "@/actions/auth.actions";
+import { forceRedirect } from "@/actions";
 
 import { showToast } from "@/utils/message";
 
@@ -19,7 +20,6 @@ import {
 
 export default function SignUp() {
   const searchParams = useSearchParams();
-  const router = useRouter();
 
   const emailRef = useRef<InputType>(null);
   const nameRef = useRef<InputType>(null);
@@ -27,7 +27,7 @@ export default function SignUp() {
   const [email, setEmail] = useState<string>(searchParams.get("email") ?? "");
   const [password, setPassword] = useState<string>("");
   const [passwordCheck, setPasswordCheck] = useState<string>("");
-  const [name, setName] = useState<string>(searchParams.get("name") ?? "");
+  const [name, setName] = useState<string>("");
   const [mobilePhone, setMobilePhone] = useState<string>("");
   const image: string = searchParams.get("image") ?? "";
   const provider: string = searchParams.get("provider") ?? "";
@@ -52,9 +52,10 @@ export default function SignUp() {
     } else formData.append("password", password);
 
     startTransition(async () => {
-      const res = await SignUpAction(formData);
-      showToast({ message: res.message });
-      if (res.ok) router.replace("/sign-in");
+      SignUpAction(formData).then((res) => {
+        showToast({ message: res.message });
+        if (res.ok) forceRedirect("/sign-in", "replace"); // 라우트 인터셉트 방지
+      });
     });
   };
 
@@ -64,7 +65,7 @@ export default function SignUp() {
   }, [isOAuthSignUp]);
 
   return (
-    <div className="rounded-lg p-12 sm:w-full md:w-1/2 lg:w-1/3">
+    <div className="p-12">
       <h1 className="mb-7 text-center text-2xl font-bold">회원가입</h1>
       <form className="w-full" onSubmit={handleSubmit} noValidate>
         <Input
@@ -110,7 +111,7 @@ export default function SignUp() {
                 invalidMessage: "비밀번호확인을 입력해주세요",
               }}
               pattern={{
-                regExp: new RegExp(password),
+                regExp: password ? new RegExp(`^${password}$`) : /^(?!.*)/,
                 invalidMessage: "비밀번호가 일치하지 않습니다",
               }}
             />
@@ -130,7 +131,7 @@ export default function SignUp() {
           }}
         />
         <Input
-          inputType="text"
+          inputType="tel"
           inputValue={mobilePhone}
           onChange={setMobilePhone}
           labelText="휴대전화번호"
@@ -140,7 +141,7 @@ export default function SignUp() {
           }}
           pattern={{
             regExp: PHONE_RULE,
-            invalidMessage: "올바른 휴대전화번호 형식이 아닙니다.",
+            invalidMessage: "올바른 휴대전화번호 형식이 아닙니다",
           }}
         />
         <Button type="submit" isFetching={isFetching} additionalClass="w-full">

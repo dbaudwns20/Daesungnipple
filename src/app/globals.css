@@ -15,3 +15,57 @@ body {
   inset: 0;
   pointer-events: none;
 }
+
+.tabs {
+  text-align: center;
+  font-weight: 500;
+  margin-bottom: 2.5rem;
+  border-bottom: 1px solid;
+  border-color: #e5e7eb;
+  color: #9ca3af;
+
+  > ul {
+    margin-bottom: -2px;
+    display: flex;
+    width: 100%;
+
+    > li {
+      width: 100%;
+
+      .tab {
+        display: inline-block;
+        width: 100%;
+        padding: 1rem;
+        cursor: pointer;
+        transition-duration: 300ms;
+
+        &:hover {
+          color: #9ca3af;
+          border-bottom: 2px solid;
+          border-color: #d1d5db;
+        }
+
+        &.is-active {
+          color: #3b82f6;
+          font-weight: 700;
+          border-bottom: 2px solid;
+          border-color: #3b82f6;
+        }
+      }
+    }
+  }
+
+  &.is-box {
+    border: 1px solid #e5e7eb;
+    border-top-left-radius: 0.75rem;
+    border-top-right-radius: 0.75rem;
+
+    > ul > li {
+      border-right: 1px solid #e5e7eb;
+
+      &:last-child {
+        border-right: none;
+      }
+    }
+  }
+}

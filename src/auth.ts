@@ -1,29 +1,58 @@
+import { Provider } from "@/types/common";
+
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import Kakao from "next-auth/providers/kakao";
 import Naver from "next-auth/providers/naver";
 import Credentials from "next-auth/providers/credentials";
-import type { Provider } from "next-auth/providers";
+import type { Provider as AuthProvider } from "next-auth/providers";
 
-import { getAuthUser, checkUserExist } from "@/services/auth/sign.in.service";
+import {
+  getAuthUser,
+  findUserByEmail,
+  checkUserHasLinkedProvider,
+} from "@/services/auth.service";
 
-const providers: Provider[] = [
+const providerMap: Map<string, AuthProvider> = new Map<string, AuthProvider>([
+  ["GOOGLE", Google],
+  ["NAVER", Naver],
+  ["KAKAO", Kakao],
+]);
+
+const providers: AuthProvider[] = [
   Credentials({
     credentials: {
       email: { label: "Email", type: "email" },
       password: { label: "Password", type: "password" },
     },
     authorize: async (credentials) => {
-      return await getAuthUser({
-        email: credentials.email as string,
-        password: credentials.password as string,
-      });
+      const user = await getAuthUser(
+        credentials.email as string,
+        credentials.password as string,
+      )!;
+
+      // 기본 로그인 시 해당 이메일이 OAuth 계정으로 연동 되어있는지 체크
+      if (await checkUserHasLinkedProvider(user!.id)) {
+        throw new Error(
+          "소셜 로그인에 연동된 이메일입니다\n소셜 로그인을 이용해주세요",
+        );
+      }
+
+      return user;
     },
   }),
-  Google,
-  Naver,
-  Kakao,
 ];
+
+function setProviders(): AuthProvider[] {
+  const envProviders: string[] =
+    process.env.NEXT_PUBLIC_AUTH_PROVIDERS!.split("|");
+  envProviders.forEach((provider) => {
+    if (providerMap.has(provider)) {
+      providers.push(providerMap.get(provider)!);
+    }
+  });
+  return providers;
+}
 
 /**
  * 네이버 OAuth2 는 OAuth 2.0 스펙을 엄격히 지키지 않기 때문에 인터셉터로 중간 처리 필요
@@ -67,21 +96,35 @@ export const naverFetchInterceptor =
   };
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  providers: providers,
+  providers: setProviders(),
   callbacks: {
     async signIn({ user, account, profile }) {
+      // provider (google, kakao, naver)
+      const provider: string = account!.provider.toUpperCase();
+
+      // 이메일로 DB 사용자 정보 가져오기
+      const dbUser = await findUserByEmail(user.email!);
+
       // 가입된 이용자가 아니라면 회원가입 페이지로 이동시킨다
-      if (await checkUserExist(user.email!)) {
-        const { email, name, image } = user;
-        const provider: string = account!.provider;
+      if (!dbUser)
         return encodeURI(
-          `/sign-up?email=${email}&name=${name}&image=${image}&provider=${provider.toUpperCase()}`,
+          `/sign-up?email=${user!.email}&image=${user!.image}&provider=${provider}`,
         );
-      }
+
+      // OAuth 로그인 시 해당 이메일이 기존 회원가입 되어있는지 체크
+      if (
+        provider != "CREDENTIALS" &&
+        !(await checkUserHasLinkedProvider(dbUser!.id, provider as Provider))
+      )
+        return encodeURI(
+          `/sign-in/error?error_message=이미 회원가입 된 이메일입니다.\n기본 로그인을 이용해 주세요.`,
+        );
+
       return true;
     },
   },
   pages: {
     signIn: "/sign-in", // 커스텀 페이지
+    error: "/sign-in/error",
   },
 });

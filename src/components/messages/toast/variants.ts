@@ -12,7 +12,7 @@ export type ToastSizeType = "xs" | "sm" | "md" | "lg" | "xl";
 
 export const ToastVariants = cva(
   `absolute
-   bottom-[20%]
+   bottom-[10%]
    left-1/2
    z-40
    h-auto
@@ -20,11 +20,12 @@ export const ToastVariants = cva(
    max-w-[30%]
    -translate-x-1/2
    animate-fadeIn
-   whitespace-normal
-   break-words
+   whitespace-break-spaces
    rounded-lg
    text-center
-   shadow-xl`,
+   shadow-xl
+   sm:max-w-[85%]
+   md:max-w-[85%]`,
   {
     variants: {
       color: {
