@@ -17,6 +17,7 @@ export default function MainHeader(props: HeaderProps) {
       <div className="inline-flex gap-4 text-white">
         <Link href="/">Home</Link>
         <Link href="/products">상품</Link>
+        <Link href="/management">관리자</Link>
       </div>
       <div className="flex gap-2">
         {session ? (
