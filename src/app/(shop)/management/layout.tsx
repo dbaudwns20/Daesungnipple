@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 
 const NavLinks = [
+  { name: "대시보드", href: "/management" },
   { name: "주문", href: "/management/orders" },
   { name: "상품", href: "/management/products" },
   { name: "카테고리", href: "/management/categories" },
@@ -22,7 +23,7 @@ export default function ManagementLayout(
     <main>
       <nav className="flex w-full items-start gap-5 bg-gray-50 p-3 text-sm font-bold">
         {NavLinks.map((link) => {
-          const isActive = pathname.startsWith(link.href);
+          const isActive = pathname === link.href;
           return (
             <Link
               className={`${isActive ? "text-blue-500" : "text-gray-500"} hover:text-blue-400`}

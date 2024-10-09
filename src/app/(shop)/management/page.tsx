@@ -1,14 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-
 export default function ManagementPage() {
-  const router = useRouter();
-
-  useEffect(() => {
-    router.replace("/management/orders");
-  });
-
-  return null;
+  return <h1>대시보드</h1>;
 }
