@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 
-import Grid from "@/components/grid/grid";
+import Grid from "@/components/grid";
 import { type GridOptions, type GridType } from "@/components/grid/type";
 import Button, { type ButtonType } from "@/components/button/button";
+
+import { showToast } from "@/utils/message";
 
 var treeData = [
   {
@@ -290,10 +292,7 @@ export default function CategoriesPage() {
   const buttonRef = useRef<ButtonType>(null);
 
   const gridOptions: GridOptions = {
-    data: treeData,
     scrollX: false,
-    bodyHeight: "fitToParent",
-    heightResizable: true,
     rowHeaders: ["checkbox"],
     draggable: true,
     treeColumnOptions: {
@@ -302,25 +301,23 @@ export default function CategoriesPage() {
     },
     columns: [
       {
-        header: "Name",
+        header: "이름",
         name: "name",
-        width: 300,
       },
       {
-        header: "Artist",
-        name: "artist",
+        header: "사용여부",
+        name: "isActive",
+        width: 100,
       },
       {
-        header: "Type",
-        name: "type",
+        header: "생성일자",
+        name: "createdAt",
+        width: 200,
       },
       {
-        header: "Release",
-        name: "release",
-      },
-      {
-        header: "Genre",
-        name: "genre",
+        header: "수정일자",
+        name: "updatedAt",
+        width: 200,
       },
     ],
     contextMenu: null,
@@ -339,6 +336,17 @@ export default function CategoriesPage() {
         break;
     }
   };
+
+  const getCategoryList = useCallback(async () => {
+    const res: Response = await fetch("/api/products/categories");
+    const data = await res.json();
+    if (!res.ok) showToast(data.message);
+    else gridRef.current?.setGridData(data.list);
+  }, []);
+
+  useEffect(() => {
+    getCategoryList();
+  }, [getCategoryList]);
 
   return (
     <>

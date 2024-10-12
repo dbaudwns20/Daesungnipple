@@ -23,6 +23,7 @@ const Grid = forwardRef((props: GridProps, ref) => {
 
   // 부모 컴포넌트에서 사용할 수 있는 함수 선언
   useImperativeHandle(ref, () => ({
+    setGridData,
     unmount,
     expandAll,
     collapseAll,
@@ -38,6 +39,7 @@ const Grid = forwardRef((props: GridProps, ref) => {
   }, [gridOptions]);
 
   // grid Api
+  const setGridData = (newData: any) => gridRef.current!.resetData(newData);
   const expandAll = () => gridRef.current!.expandAll();
   const collapseAll = () => gridRef.current!.collapseAll();
   const unmount = () => gridRef.current!.destroy();
