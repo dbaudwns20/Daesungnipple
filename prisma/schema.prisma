@@ -39,11 +39,11 @@ enum Provider {
 
 // OAuth 2 연결 정보 (구글, 카카오, 네이버)
 model LinkedProvider {
-  id        Int       @id @default(autoincrement())
-  userId    String    @map("user_id")
+  id        Int      @id @default(autoincrement())
+  userId    String   @map("user_id")
   provider  Provider
-  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([userId])
   @@map("linked_provider")
@@ -166,8 +166,9 @@ model ProductCategory {
   id        Int       @id @default(autoincrement())
   parentId  Int?      @map("parent_id") // 상위 카테고리 ID
   name      String    @map("name") @db.VarChar(255) // 카테고리명
-  isActive  Boolean   @map("is_active") @default(true) // 사용여부
+  isActive  Boolean   @default(true) @map("is_active") // 사용여부
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
   product   Product[]
 
   children ProductCategory[] @relation("ProductCategoryHierarchy")
