@@ -166,11 +166,12 @@ model ProductCategory {
   id        Int       @id @default(autoincrement())
   parentId  Int?      @map("parent_id") // 상위 카테고리 ID
   name      String    @map("name") @db.VarChar(255) // 카테고리명
+  isActive  Boolean   @map("is_active") @default(true) // 사용여부
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
   product   Product[]
 
   children ProductCategory[] @relation("ProductCategoryHierarchy")
-  parent   ProductCategory?  @relation("ProductCategoryHierarchy", fields: [parentId], references: [id])
+  parent   ProductCategory?  @relation("ProductCategoryHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
 
   @@map("product_category")
 }
