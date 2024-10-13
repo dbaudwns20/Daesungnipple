@@ -167,12 +167,13 @@ model ProductCategory {
   parentId  Int?      @map("parent_id") // 상위 카테고리 ID
   name      String    @map("name") @db.VarChar(255) // 카테고리명
   isActive  Boolean   @default(true) @map("is_active") // 사용여부
+  viewOrder Int       @default(1) @map("view_order") // 정렬순서
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
   updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
   product   Product[]
 
   children ProductCategory[] @relation("ProductCategoryHierarchy")
-  parent   ProductCategory?  @relation("ProductCategoryHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  parent   ProductCategory?  @relation("ProductCategoryHierarchy", fields: [parentId], references: [id])
 
   @@map("product_category")
 }
