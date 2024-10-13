@@ -2,7 +2,7 @@
 
 import { checkFormData, checkParams } from "@/actions";
 
-import { SendMethod } from "@/types/common";
+import { SendMethod } from "@/types";
 
 import { sendPasswordResetMail } from "@/utils/mail";
 

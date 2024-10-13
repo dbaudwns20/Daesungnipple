@@ -111,7 +111,6 @@ model Manufacturer {
   siteUrl   String    @default("") @map("site_url") @db.VarChar(2000) // 제조사 홈페이지 링크
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
   updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
-  deletedAt DateTime? @map("deleted_at") @db.Timestamp(0)
   products  Product[]
 
   @@map("manufacturer")
@@ -122,7 +121,7 @@ model Manufacturer {
 // 상품 이미지
 model ProductImage {
   id        Int      @id @default(autoincrement())
-  productId Int      @map("product_id")
+  productId String   @map("product_id")
   url       String   @default("") @map("url") @db.VarChar(2000)
   viewOrder Int      @default(0) @map("view_order") // 이미지 순서
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
@@ -135,7 +134,7 @@ model ProductImage {
 // 상품 상세설명 이미지
 model ProductDetailImage {
   id        Int      @id @default(autoincrement())
-  productId Int      @map("product_id")
+  productId String   @map("product_id")
   url       String   @default("") @map("url") @db.VarChar(2000)
   viewOrder Int      @default(0) @map("view_order") // 이미지 순서
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
@@ -148,7 +147,7 @@ model ProductDetailImage {
 // 상품 구매 옵션
 model ProductOption {
   id         Int      @id @default(autoincrement())
-  productId  Int      @map("product_id")
+  productId  String   @map("product_id")
   name       String   @map("name") @db.VarChar(255) // 옵션명
   price      Int      @default(0) @map("price") // 옵션 추가 가격
   stockCount Int      @default(0) @map("stock_count") // 고민 => 재고 수량, 0 이면 무제한 -1이면 품절, 1이상이면 해당 수량만큼 재고
@@ -180,7 +179,7 @@ model ProductCategory {
 
 // 상품
 model Product {
-  id                 Int                  @id @default(autoincrement())
+  id                 String               @id @default(uuid())
   name               String               @map("name") @db.VarChar(255) // 상품명
   modelName          String               @default("") @map("model_name") @db.VarChar(255) // 모델명
   mainImageUrl       String               @default("") @map("main_image_url") @db.VarChar(2000) // 대표 이미지
@@ -192,9 +191,10 @@ model Product {
   updatedAt          DateTime             @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
   deletedAt          DateTime?            @map("deleted_at") @db.Timestamp(0)
   exposedAt          DateTime?            @map("exposed_at") @db.Timestamp(0) // 노출 시작일
-  // 관련 이미지
-  images             ProductImage[] // 상품 이미지
-  detailImages       ProductDetailImage[] // 상품 상세설명 이미지
+  // 상품 이미지
+  images             ProductImage[]
+  // 상품 상세설명 이미지
+  detailImages       ProductDetailImage[]
   // 관련 제조사
   manufacturerId     Int?                 @map("manufacturer_id")
   manufacturer       Manufacturer?        @relation(fields: [manufacturerId], references: [id], onDelete: NoAction, onUpdate: NoAction)

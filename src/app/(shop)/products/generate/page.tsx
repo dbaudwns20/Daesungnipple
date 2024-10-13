@@ -14,8 +14,8 @@ import Link from "next/link";
 import InputObject from "@/components/input/input.object";
 import Button, { type ButtonType } from "@/components/button";
 import { NOT_EMPTY_RULE, validateForm } from "@/utils/validator";
-import type { Product } from "@/types/product";
-import { initProduct } from "@/types/product";
+import type { Product } from "@/types";
+import { initProduct } from "@/types";
 import { showToast } from "@/utils/message";
 import { CreateProductAction } from "@/actions/product.actions";
 

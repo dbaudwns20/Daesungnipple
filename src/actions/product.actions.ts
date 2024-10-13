@@ -1,6 +1,6 @@
 "use server";
 
-import type { Product } from "@/types/product";
+import type { Product } from "@/types";
 import { createProduct } from "@/services/product.service";
 
 type ProductActionResponse = {
