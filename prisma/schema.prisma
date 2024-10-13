@@ -139,7 +139,7 @@ model ProductDetailImage {
   url       String   @default("") @map("url") @db.VarChar(2000)
   viewOrder Int      @default(0) @map("view_order") // 이미지 순서
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
-  product   Product  @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_PRODUCT_DETAIL_IMAGE_PRODUCT_ID")
+  product   Product  @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([productId])
   @@map("product_detail_image")

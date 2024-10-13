@@ -1,4 +1,4 @@
-import { ProductCategory } from "@prisma/client";
+import type { ProductCategory } from "@prisma/client";
 
 export interface ProductCategoryForAdmin extends ProductCategory {
   _children?: ProductCategoryForAdmin[]; // 자식 카테고리

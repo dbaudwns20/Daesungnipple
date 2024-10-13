@@ -2,7 +2,7 @@ import { useTransition } from "react";
 
 import { SignInByOAuthAction } from "@/actions/auth.actions";
 
-import Button, { type ButtonType } from "@/components/button/button";
+import Button, { type ButtonType } from "@/components/button";
 
 import Google from "@/assets/google.svg";
 import Kakao from "@/assets/kakao.svg";

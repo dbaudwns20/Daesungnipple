@@ -7,3 +7,12 @@ export type Provider = "GOOGLE" | "KAKAO" | "NAVER";
  * 알림메시지 발송 방법
  */
 export type SendMethod = "MAIL" | "SMS";
+
+/**
+ * Server Action Response
+ */
+export interface ActionResponse {
+  ok: boolean;
+  message: string;
+  data?: unknown;
+}
