@@ -44,10 +44,6 @@ const Grid = forwardRef((props: GridProps, ref) => {
   const collapseAll = () => gridRef.current!.collapseAll();
   const unmount = () => gridRef.current!.destroy();
 
-  useEffect(() => {
-    initGrid();
-  }, [initGrid]);
-
   // EventBus Handling
   useEffect(() => {
     if (!gridRef.current) return;
@@ -66,6 +62,10 @@ const Grid = forwardRef((props: GridProps, ref) => {
       }
     };
   }, []);
+
+  useEffect(() => {
+    initGrid();
+  }, [initGrid]);
 
   return <div ref={componentRef}></div>;
 });
