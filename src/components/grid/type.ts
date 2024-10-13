@@ -9,8 +9,7 @@ export interface GridProps {
 }
 
 export interface GridType {
-  read: () => Promise<void>;
-  reload: () => Promise<void>;
+  setGridData: (newData: any) => void;
   unmount: () => void;
   expandAll: () => void;
   collapseAll: () => void;

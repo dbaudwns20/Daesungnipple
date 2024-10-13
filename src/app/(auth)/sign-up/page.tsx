@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useTransition, FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 
 import Input, { type InputType } from "@/components/input/input";
-import Button, { type ButtonType } from "@/components/button/button";
+import Button, { type ButtonType } from "@/components/button";
 
 import { SignUpAction } from "@/actions/auth.actions";
 import { forceRedirect } from "@/actions";

@@ -39,11 +39,11 @@ enum Provider {
 
 // OAuth 2 연결 정보 (구글, 카카오, 네이버)
 model LinkedProvider {
-  id        Int       @id @default(autoincrement())
-  userId    String    @map("user_id")
+  id        Int      @id @default(autoincrement())
+  userId    String   @map("user_id")
   provider  Provider
-  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([userId])
   @@map("linked_provider")
@@ -139,7 +139,7 @@ model ProductDetailImage {
   url       String   @default("") @map("url") @db.VarChar(2000)
   viewOrder Int      @default(0) @map("view_order") // 이미지 순서
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
-  product   Product  @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_PRODUCT_DETAIL_IMAGE_PRODUCT_ID")
+  product   Product  @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([productId])
   @@map("product_detail_image")
@@ -166,7 +166,10 @@ model ProductCategory {
   id        Int       @id @default(autoincrement())
   parentId  Int?      @map("parent_id") // 상위 카테고리 ID
   name      String    @map("name") @db.VarChar(255) // 카테고리명
+  isActive  Boolean   @default(true) @map("is_active") // 사용여부
+  viewOrder Int       @default(1) @map("view_order") // 정렬순서
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
   product   Product[]
 
   children ProductCategory[] @relation("ProductCategoryHierarchy")
