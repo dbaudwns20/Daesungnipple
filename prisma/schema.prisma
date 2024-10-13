@@ -2,10 +2,14 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// ?connection_limit=5&pool_timeout=2
+
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
+// -------------------------------------------------- 계정 정보 --------------------------------------------------
 
 // 회원정보
 model User {
@@ -96,4 +100,108 @@ model PasswordUpdateLog {
 
   @@index([userId])
   @@map("password_update_log")
+}
+
+// -------------------------------------------------- 제조사 --------------------------------------------------
+
+// 제조사
+model Manufacturer {
+  id        Int       @id @default(autoincrement())
+  name      String    @map("name") @db.VarChar(255) // 제조사명
+  siteUrl   String    @default("") @map("site_url") @db.VarChar(2000) // 제조사 홈페이지 링크
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamp(0)
+  products  Product[]
+
+  @@map("manufacturer")
+}
+
+// -------------------------------------------------- 상품 --------------------------------------------------
+
+// 상품 이미지
+model ProductImage {
+  id        Int      @id @default(autoincrement())
+  productId Int      @map("product_id")
+  url       String   @default("") @map("url") @db.VarChar(2000)
+  viewOrder Int      @default(0) @map("view_order") // 이미지 순서
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([productId])
+  @@map("product_image")
+}
+
+// 상품 상세설명 이미지
+model ProductDetailImage {
+  id        Int      @id @default(autoincrement())
+  productId Int      @map("product_id")
+  url       String   @default("") @map("url") @db.VarChar(2000)
+  viewOrder Int      @default(0) @map("view_order") // 이미지 순서
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_PRODUCT_DETAIL_IMAGE_PRODUCT_ID")
+
+  @@index([productId])
+  @@map("product_detail_image")
+}
+
+// 상품 구매 옵션
+model ProductOption {
+  id         Int      @id @default(autoincrement())
+  productId  Int      @map("product_id")
+  name       String   @map("name") @db.VarChar(255) // 옵션명
+  price      Int      @default(0) @map("price") // 옵션 추가 가격
+  stockCount Int      @default(0) @map("stock_count") // 고민 => 재고 수량, 0 이면 무제한 -1이면 품절, 1이상이면 해당 수량만큼 재고
+  isDefault  Boolean  @default(false) @map("is_default") // 기본 옵션 여부
+  viewOrder  Int      @default(0) @map("view_order") // 옵션 순서, 0이면 대표이미지
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  product    Product  @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([productId])
+  @@map("product_option")
+}
+
+// 상품 카테고리
+model ProductCategory {
+  id        Int       @id @default(autoincrement())
+  parentId  Int?      @map("parent_id") // 상위 카테고리 ID
+  name      String    @map("name") @db.VarChar(255) // 카테고리명
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
+  product   Product[]
+
+  children ProductCategory[] @relation("ProductCategoryHierarchy")
+  parent   ProductCategory?  @relation("ProductCategoryHierarchy", fields: [parentId], references: [id])
+
+  @@map("product_category")
+}
+
+// 상품
+model Product {
+  id                 Int                  @id @default(autoincrement())
+  name               String               @map("name") @db.VarChar(255) // 상품명
+  modelName          String               @default("") @map("model_name") @db.VarChar(255) // 모델명
+  mainImageUrl       String               @default("") @map("main_image_url") @db.VarChar(2000) // 대표 이미지
+  previewDescription String               @default("") @map("preview_description") @db.VarChar(255) // 상품 요약설명
+  description        String               @default("") @map("description") @db.VarChar(2000) // 상품설명
+  price              Int                  @default(0) @map("price") // 가격
+  stockCount         Int                  @default(0) @map("stock_count") // 고민 => 재고 수량, 0 이면 무제한 -1이면 품절, 1이상이면 해당 수량만큼 재고
+  createdAt          DateTime             @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt          DateTime             @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
+  deletedAt          DateTime?            @map("deleted_at") @db.Timestamp(0)
+  exposedAt          DateTime?            @map("exposed_at") @db.Timestamp(0) // 노출 시작일
+  // 관련 이미지
+  images             ProductImage[] // 상품 이미지
+  detailImages       ProductDetailImage[] // 상품 상세설명 이미지
+  // 관련 제조사
+  manufacturerId     Int?                 @map("manufacturer_id")
+  manufacturer       Manufacturer?        @relation(fields: [manufacturerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  // 관련 구매 옵션
+  optionDescription  String               @default("") @map("option_description") @db.VarChar(100) // 옵션 설명
+  options            ProductOption[]
+  // 관련 카테고리
+  categoryId         Int?                 @map("product_category_id")
+  category           ProductCategory?     @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  // 배송관련 정보 & 옵션은 일단 모두 통일하는걸로
+  @@map("product")
 }

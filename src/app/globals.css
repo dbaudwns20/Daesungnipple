@@ -6,7 +6,7 @@ body {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  @apply dark:bg-gray-800;
+  /*@apply dark:bg-gray-400;*/
 }
 
 #message-wrapper {
