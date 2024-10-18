@@ -1,7 +1,7 @@
 import { createElement } from "react";
 import { Root, createRoot } from "react-dom/client";
 
-import Toast from "@/components/messages/toast/toast";
+import Toast from "@/components/messages/toast";
 
 import { generateRandomText } from "@/utils/common";
 import {
