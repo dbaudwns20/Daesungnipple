@@ -1,6 +1,6 @@
 import SignIn from "@/app/(auth)/sign-in/page";
 
-import Modal from "@/components/modal/modal";
+import Modal from "@/components/modal";
 
 export default function ModalSignIn() {
   return (

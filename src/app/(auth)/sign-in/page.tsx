@@ -4,9 +4,9 @@ import { useState, useRef, useEffect, useTransition, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-import Input, { type InputType } from "@/components/input/input";
+import Input, { type InputType } from "@/components/input";
 import Button, { type ButtonType } from "@/components/button";
-import OAuthProviders from "@/components/oauth-providers/oauth.providers";
+import OAuthProviders from "@/components/oauth-providers";
 
 import { SignInAction } from "@/actions/auth.actions";
 

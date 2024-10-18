@@ -11,7 +11,7 @@ import {
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-import Input, { type InputType } from "@/components/input/input";
+import Input, { type InputType } from "@/components/input";
 import Button, { type ButtonType } from "@/components/button";
 
 import { FindUserEmail, SendPasswordRestEmail } from "@/actions/auth.actions";
