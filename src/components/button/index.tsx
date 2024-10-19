@@ -1,34 +1,16 @@
+"use client";
+
 import {
   useId,
   useRef,
   useEffect,
   useImperativeHandle,
   forwardRef,
-  ReactNode,
 } from "react";
 
-import {
-  ButtonVariants,
-  type ButtonColorType,
-  type ButtonSizeType,
-} from "./variants";
+import { ButtonProps } from "./type";
+import { ButtonVariants } from "./variants";
 import { cn } from "@/utils/cn";
-
-export type ButtonType = {
-  setFocus: () => void;
-  element: HTMLButtonElement | null;
-};
-
-type ButtonProps = {
-  children: ReactNode | ReactNode[] | string;
-  type: "button" | "submit" | "reset";
-  isDisabled?: boolean;
-  isFetching?: boolean;
-  color?: ButtonColorType;
-  size?: ButtonSizeType;
-  additionalClass?: string;
-  onClick?: (...arg: any) => void | Promise<void>;
-};
 
 const Button = forwardRef((props: ButtonProps, ref) => {
   const {
@@ -108,3 +90,9 @@ const Button = forwardRef((props: ButtonProps, ref) => {
 
 Button.displayName = "Button";
 export default Button;
+export type {
+  ButtonProps,
+  ButtonType,
+  ButtonColorType,
+  ButtonSizeType,
+} from "./type";
