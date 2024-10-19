@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 import Input, { type InputType } from "@/components/input";
-import Button, { type ButtonType } from "@/components/button";
+import Button from "@/components/button";
 import OAuthProviders from "@/components/oauth-providers";
 
 import { SignInAction } from "@/actions/auth.actions";
@@ -46,8 +46,8 @@ export default function SignIn() {
       <form className="w-full" onSubmit={handleSubmit} noValidate>
         <Input
           ref={emailRef}
-          inputType="text"
-          inputValue={email}
+          type="text"
+          value={email}
           onChange={setEmail}
           required={{
             isRequired: true,
@@ -56,8 +56,8 @@ export default function SignIn() {
           labelText="이메일"
         />
         <Input
-          inputType="password"
-          inputValue={password}
+          type="password"
+          value={password}
           onChange={setPassword}
           labelText="비밀번호"
           required={{

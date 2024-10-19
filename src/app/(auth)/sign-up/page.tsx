@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useTransition, FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 
 import Input, { type InputType } from "@/components/input";
-import Button, { type ButtonType } from "@/components/button";
+import Button from "@/components/button";
 
 import { SignUpAction } from "@/actions/auth.actions";
 import { forceRedirect } from "@/actions";
@@ -70,8 +70,8 @@ export default function SignUp() {
       <form className="w-full" onSubmit={handleSubmit} noValidate>
         <Input
           ref={emailRef}
-          inputType="email"
-          inputValue={email}
+          type="email"
+          value={email}
           onChange={setEmail}
           isDisabled={isOAuthSignUp}
           required={{
@@ -87,8 +87,8 @@ export default function SignUp() {
         {provider === "" ? (
           <>
             <Input
-              inputType="password"
-              inputValue={password}
+              type="password"
+              value={password}
               onChange={setPassword}
               labelText="비밀번호"
               required={{
@@ -102,8 +102,8 @@ export default function SignUp() {
               }}
             />
             <Input
-              inputType="password"
-              inputValue={passwordCheck}
+              type="password"
+              value={passwordCheck}
               onChange={setPasswordCheck}
               labelText="비밀번호확인"
               required={{
@@ -121,8 +121,8 @@ export default function SignUp() {
         )}
         <Input
           ref={nameRef}
-          inputType="text"
-          inputValue={name}
+          type="text"
+          value={name}
           onChange={setName}
           labelText="이름"
           required={{
@@ -131,8 +131,8 @@ export default function SignUp() {
           }}
         />
         <Input
-          inputType="tel"
-          inputValue={mobilePhone}
+          type="tel"
+          value={mobilePhone}
           onChange={setMobilePhone}
           labelText="휴대전화번호"
           required={{

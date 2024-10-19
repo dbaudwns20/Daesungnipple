@@ -12,7 +12,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 import Input, { type InputType } from "@/components/input";
-import Button, { type ButtonType } from "@/components/button";
+import Button from "@/components/button";
 
 import { FindUserEmail, SendPasswordRestEmail } from "@/actions/auth.actions";
 import { forceRedirect } from "@/actions";
@@ -114,8 +114,8 @@ export default function Find() {
               <>
                 <Input
                   ref={emailRef}
-                  inputType="email"
-                  inputValue={email}
+                  type="email"
+                  value={email}
                   onChange={setEmail}
                   required={{
                     isRequired: true,
@@ -155,8 +155,8 @@ export default function Find() {
               <>
                 <Input
                   ref={nameRef}
-                  inputType="text"
-                  inputValue={name}
+                  type="text"
+                  value={name}
                   onChange={setName}
                   required={{
                     isRequired: true,
@@ -165,8 +165,8 @@ export default function Find() {
                   labelText="이름"
                 />
                 <Input
-                  inputType="text"
-                  inputValue={mobilePhone}
+                  type="text"
+                  value={mobilePhone}
                   onChange={setMobilePhone}
                   labelText="휴대전화번호"
                   required={{

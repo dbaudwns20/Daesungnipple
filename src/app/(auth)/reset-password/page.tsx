@@ -92,8 +92,8 @@ export default function ResetPassword() {
           <form className="w-full" onSubmit={handleSubmit} noValidate>
             <Input
               ref={passwordRef}
-              inputType="password"
-              inputValue={password}
+              type="password"
+              value={password}
               onChange={setPassword}
               labelText="신규 비밀번호"
               required={{
@@ -107,8 +107,8 @@ export default function ResetPassword() {
               }}
             />
             <Input
-              inputType="password"
-              inputValue={passwordCheck}
+              type="password"
+              value={passwordCheck}
               onChange={setPasswordCheck}
               labelText="신규 비밀번호확인"
               required={{
