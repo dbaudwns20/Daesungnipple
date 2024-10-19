@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction } from "react";
+import { ChangeEvent } from "react";
 
 export type Required = {
   isRequired: boolean;
@@ -14,14 +14,12 @@ type NumberTypeProps = {
   type: "number";
   value: number;
   step?: number;
-  onChange: Dispatch<SetStateAction<number>>;
 };
 
 type CommonTypeProps = {
   type: "text" | "password" | "email" | "tel";
   value: string;
   pattern?: Pattern | null;
-  onChange: Dispatch<SetStateAction<string>>;
 };
 
 export type InputProps = {
@@ -31,6 +29,7 @@ export type InputProps = {
   required?: Required;
   valueRange?: [number, number] | null;
   additionalClass?: string;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void | Promise<void>;
 } & (CommonTypeProps | NumberTypeProps);
 
 export type InputType = {

@@ -114,7 +114,7 @@ const Input = forwardRef((props: InputProps, ref) => {
   // change 이벤트 헨들링
   const handleChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
-      let value: any = event.target.value;
+      let value: string | number = event.target.value;
 
       // type 이 number 가 아닌 경우에만 trim 적용
       if (type !== "number") {
@@ -123,8 +123,7 @@ const Input = forwardRef((props: InputProps, ref) => {
 
       if (!value) {
         setCustomValidity("");
-        onChange(value);
-        return;
+        onChange(event);
       }
 
       let [errorMessage, invalidText] = validateValueRange(value);
@@ -135,9 +134,9 @@ const Input = forwardRef((props: InputProps, ref) => {
       }
 
       setCustomValidity(errorMessage, invalidText);
-      onChange(value);
+      onChange(event);
     },
-    [type, pattern, setCustomValidity, onChange, validateValueRange],
+    [type, pattern, setCustomValidity, validateValueRange, onChange],
   );
 
   const handleInvalid = useCallback(

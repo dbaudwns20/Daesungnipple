@@ -7,6 +7,7 @@ import {
   useEffect,
   useCallback,
   FormEvent,
+  ChangeEvent,
 } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -116,7 +117,9 @@ export default function Find() {
                   ref={emailRef}
                   type="email"
                   value={email}
-                  onChange={setEmail}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setEmail(e.target.value)
+                  }
                   required={{
                     isRequired: true,
                     invalidMessage: "이메일을 입력해주세요",
@@ -157,7 +160,9 @@ export default function Find() {
                   ref={nameRef}
                   type="text"
                   value={name}
-                  onChange={setName}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setName(e.target.value)
+                  }
                   required={{
                     isRequired: true,
                     invalidMessage: "이름을 입력해주세요",
@@ -167,7 +172,9 @@ export default function Find() {
                 <Input
                   type="text"
                   value={mobilePhone}
-                  onChange={setMobilePhone}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setMobilePhone(e.target.value)
+                  }
                   labelText="휴대전화번호"
                   required={{
                     isRequired: true,

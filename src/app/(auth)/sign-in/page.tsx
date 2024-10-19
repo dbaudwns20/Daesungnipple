@@ -1,6 +1,13 @@
 "use client";
 
-import { useState, useRef, useEffect, useTransition, FormEvent } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  useTransition,
+  FormEvent,
+  ChangeEvent,
+} from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -48,7 +55,9 @@ export default function SignIn() {
           ref={emailRef}
           type="text"
           value={email}
-          onChange={setEmail}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setEmail(e.target.value)
+          }
           required={{
             isRequired: true,
             invalidMessage: "이메일을 입력해주세요",
@@ -58,7 +67,9 @@ export default function SignIn() {
         <Input
           type="password"
           value={password}
-          onChange={setPassword}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setPassword(e.target.value)
+          }
           labelText="비밀번호"
           required={{
             isRequired: true,

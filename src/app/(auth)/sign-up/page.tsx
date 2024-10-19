@@ -1,6 +1,13 @@
 "use client";
 
-import { useState, useRef, useEffect, useTransition, FormEvent } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  useTransition,
+  FormEvent,
+  ChangeEvent,
+} from "react";
 import { useSearchParams } from "next/navigation";
 
 import Input, { type InputType } from "@/components/input";
@@ -72,7 +79,9 @@ export default function SignUp() {
           ref={emailRef}
           type="email"
           value={email}
-          onChange={setEmail}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setEmail(e.target.value)
+          }
           isDisabled={isOAuthSignUp}
           required={{
             isRequired: true,
@@ -89,7 +98,9 @@ export default function SignUp() {
             <Input
               type="password"
               value={password}
-              onChange={setPassword}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setPassword(e.target.value)
+              }
               labelText="비밀번호"
               required={{
                 isRequired: true,
@@ -104,7 +115,9 @@ export default function SignUp() {
             <Input
               type="password"
               value={passwordCheck}
-              onChange={setPasswordCheck}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setPasswordCheck(e.target.value)
+              }
               labelText="비밀번호확인"
               required={{
                 isRequired: true,
@@ -123,7 +136,9 @@ export default function SignUp() {
           ref={nameRef}
           type="text"
           value={name}
-          onChange={setName}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setName(e.target.value)
+          }
           labelText="이름"
           required={{
             isRequired: true,
@@ -133,7 +148,9 @@ export default function SignUp() {
         <Input
           type="tel"
           value={mobilePhone}
-          onChange={setMobilePhone}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setMobilePhone(e.target.value)
+          }
           labelText="휴대전화번호"
           required={{
             isRequired: true,

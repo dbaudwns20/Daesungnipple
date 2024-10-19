@@ -5,8 +5,9 @@ import {
   useRef,
   useEffect,
   useTransition,
-  FormEvent,
   useCallback,
+  FormEvent,
+  ChangeEvent,
 } from "react";
 import { useSearchParams } from "next/navigation";
 
@@ -94,7 +95,9 @@ export default function ResetPassword() {
               ref={passwordRef}
               type="password"
               value={password}
-              onChange={setPassword}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setPassword(e.target.value)
+              }
               labelText="신규 비밀번호"
               required={{
                 isRequired: true,
@@ -109,7 +112,9 @@ export default function ResetPassword() {
             <Input
               type="password"
               value={passwordCheck}
-              onChange={setPasswordCheck}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setPasswordCheck(e.target.value)
+              }
               labelText="신규 비밀번호확인"
               required={{
                 isRequired: true,
