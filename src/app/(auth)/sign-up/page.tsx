@@ -78,6 +78,7 @@ export default function SignUp() {
         <Input
           ref={emailRef}
           type="email"
+          name="email"
           value={email}
           onChange={(e: ChangeEvent<HTMLInputElement>) =>
             setEmail(e.target.value)
@@ -91,17 +92,18 @@ export default function SignUp() {
             regExp: EMAIL_RULE,
             invalidMessage: "올바른 이메일 형식이 아닙니다",
           }}
-          labelText="이메일"
+          label="이메일"
         />
         {provider === "" ? (
           <>
             <Input
               type="password"
+              name="password"
               value={password}
               onChange={(e: ChangeEvent<HTMLInputElement>) =>
                 setPassword(e.target.value)
               }
-              labelText="비밀번호"
+              label="비밀번호"
               required={{
                 isRequired: true,
                 invalidMessage: "비밀번호를 입력해주세요",
@@ -114,11 +116,12 @@ export default function SignUp() {
             />
             <Input
               type="password"
+              name="passwordCheck"
               value={passwordCheck}
               onChange={(e: ChangeEvent<HTMLInputElement>) =>
                 setPasswordCheck(e.target.value)
               }
-              labelText="비밀번호확인"
+              label="비밀번호확인"
               required={{
                 isRequired: true,
                 invalidMessage: "비밀번호확인을 입력해주세요",
@@ -134,12 +137,13 @@ export default function SignUp() {
         )}
         <Input
           ref={nameRef}
+          name="name"
           type="text"
           value={name}
           onChange={(e: ChangeEvent<HTMLInputElement>) =>
             setName(e.target.value)
           }
-          labelText="이름"
+          label="이름"
           required={{
             isRequired: true,
             invalidMessage: "이름을 입력해주세요",
@@ -147,11 +151,12 @@ export default function SignUp() {
         />
         <Input
           type="tel"
+          name="mobilePhone"
           value={mobilePhone}
           onChange={(e: ChangeEvent<HTMLInputElement>) =>
             setMobilePhone(e.target.value)
           }
-          labelText="휴대전화번호"
+          label="휴대전화번호"
           required={{
             isRequired: true,
             invalidMessage: "휴대전화번호를 입력해주세요",

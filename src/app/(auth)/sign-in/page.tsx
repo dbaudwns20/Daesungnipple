@@ -53,7 +53,8 @@ export default function SignIn() {
       <form className="w-full" onSubmit={handleSubmit} noValidate>
         <Input
           ref={emailRef}
-          type="text"
+          name="email"
+          type="email"
           value={email}
           onChange={(e: ChangeEvent<HTMLInputElement>) =>
             setEmail(e.target.value)
@@ -62,15 +63,16 @@ export default function SignIn() {
             isRequired: true,
             invalidMessage: "이메일을 입력해주세요",
           }}
-          labelText="이메일"
+          label="이메일"
         />
         <Input
+          name="password"
           type="password"
           value={password}
           onChange={(e: ChangeEvent<HTMLInputElement>) =>
             setPassword(e.target.value)
           }
-          labelText="비밀번호"
+          label="비밀번호"
           required={{
             isRequired: true,
             invalidMessage: "비밀번호를 입력해주세요",

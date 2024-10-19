@@ -94,11 +94,12 @@ export default function ResetPassword() {
             <Input
               ref={passwordRef}
               type="password"
+              name="password"
               value={password}
               onChange={(e: ChangeEvent<HTMLInputElement>) =>
                 setPassword(e.target.value)
               }
-              labelText="신규 비밀번호"
+              label="신규 비밀번호"
               required={{
                 isRequired: true,
                 invalidMessage: "비밀번호를 입력해주세요",
@@ -111,11 +112,12 @@ export default function ResetPassword() {
             />
             <Input
               type="password"
+              name="passwordCheck"
               value={passwordCheck}
               onChange={(e: ChangeEvent<HTMLInputElement>) =>
                 setPasswordCheck(e.target.value)
               }
-              labelText="신규 비밀번호확인"
+              label="신규 비밀번호확인"
               required={{
                 isRequired: true,
                 invalidMessage: "비밀번호확인을 입력해주세요",

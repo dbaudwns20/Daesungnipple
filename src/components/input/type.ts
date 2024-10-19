@@ -19,14 +19,15 @@ type NumberTypeProps = {
 type CommonTypeProps = {
   type: "text" | "password" | "email" | "tel";
   value: string;
-  pattern?: Pattern | null;
 };
 
 export type InputProps = {
-  labelText: string;
+  name?: string;
+  label: string;
   isDisabled?: boolean;
   isReadOnly?: boolean;
   required?: Required;
+  pattern?: Pattern | null;
   valueRange?: [number, number] | null;
   additionalClass?: string;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void | Promise<void>;

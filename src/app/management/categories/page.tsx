@@ -13,6 +13,7 @@ export default function CategoriesPage() {
   const buttonRef = useRef<ButtonType>(null);
 
   const gridOptions: GridOptions = {
+    bodyHeight: "fitToParent",
     scrollX: false,
     rowHeaders: ["checkbox"],
     draggable: true,

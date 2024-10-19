@@ -11,15 +11,16 @@ import {
   useEffect,
 } from "react";
 
-import { Pattern, InputProps } from "./type";
+import { InputProps } from "./type";
 import { InputVariants, LabelVariants } from "./variants";
 import { cn } from "@/utils/cn";
 
 const Input = forwardRef((props: InputProps, ref) => {
   const {
     type,
+    name,
     value,
-    labelText,
+    label,
     isDisabled = false,
     isReadOnly = false,
     required = {
@@ -28,11 +29,10 @@ const Input = forwardRef((props: InputProps, ref) => {
     },
     valueRange = null,
     additionalClass = "",
+    pattern = null,
     onChange,
   } = props;
 
-  const pattern: Pattern | null =
-    type !== "number" ? (props.pattern ?? null) : null;
   const step: number | null = type === "number" ? (props.step ?? 1) : null;
 
   // 부모 컴포넌트에서 사용할 수 있는 함수 선언
@@ -114,7 +114,7 @@ const Input = forwardRef((props: InputProps, ref) => {
   // change 이벤트 헨들링
   const handleChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
-      let value: string | number = event.target.value;
+      let value: string = event.target.value;
 
       // type 이 number 가 아닌 경우에만 trim 적용
       if (type !== "number") {
@@ -124,11 +124,12 @@ const Input = forwardRef((props: InputProps, ref) => {
       if (!value) {
         setCustomValidity("");
         onChange(event);
+        return;
       }
 
       let [errorMessage, invalidText] = validateValueRange(value);
 
-      if (type !== "number" && pattern && !pattern.regExp.test(value)) {
+      if (pattern && !pattern.regExp.test(value)) {
         errorMessage = "Value's format is invalid.";
         invalidText = pattern.invalidMessage;
       }
@@ -161,7 +162,8 @@ const Input = forwardRef((props: InputProps, ref) => {
       <div className="relative h-12 w-full">
         <input
           id={`input_${inputId}`}
-          aria-label={labelText}
+          name={name}
+          aria-label={label}
           className={cn(InputVariants({ invalid: isInvalid }), additionalClass)}
           placeholder=" "
           ref={inputRef}
@@ -179,7 +181,7 @@ const Input = forwardRef((props: InputProps, ref) => {
           ref={labelRef}
           className={cn(LabelVariants({ invalid: isInvalid }))}
         >
-          {labelText}
+          {label}
           {required.isRequired ? (
             <span className="ml-1 text-orange-400">*</span>
           ) : (

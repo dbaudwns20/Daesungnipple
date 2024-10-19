@@ -116,6 +116,7 @@ export default function Find() {
                 <Input
                   ref={emailRef}
                   type="email"
+                  name="email"
                   value={email}
                   onChange={(e: ChangeEvent<HTMLInputElement>) =>
                     setEmail(e.target.value)
@@ -128,7 +129,7 @@ export default function Find() {
                     regExp: EMAIL_RULE,
                     invalidMessage: "올바른 이메일 형식이 아닙니다",
                   }}
-                  labelText="이메일"
+                  label="이메일"
                 />
                 <Button
                   type="submit"
@@ -159,6 +160,7 @@ export default function Find() {
                 <Input
                   ref={nameRef}
                   type="text"
+                  name="name"
                   value={name}
                   onChange={(e: ChangeEvent<HTMLInputElement>) =>
                     setName(e.target.value)
@@ -167,15 +169,16 @@ export default function Find() {
                     isRequired: true,
                     invalidMessage: "이름을 입력해주세요",
                   }}
-                  labelText="이름"
+                  label="이름"
                 />
                 <Input
-                  type="text"
+                  type="tel"
+                  name="mobilePhone"
                   value={mobilePhone}
                   onChange={(e: ChangeEvent<HTMLInputElement>) =>
                     setMobilePhone(e.target.value)
                   }
-                  labelText="휴대전화번호"
+                  label="휴대전화번호"
                   required={{
                     isRequired: true,
                     invalidMessage: "휴대전화번호를 입력해주세요",
