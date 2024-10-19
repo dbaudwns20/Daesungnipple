@@ -2,8 +2,7 @@
 
 import { useEffect, useRef, useCallback } from "react";
 
-import Grid from "@/components/grid";
-import { type GridOptions, type GridType } from "@/components/grid/type";
+import Grid, { type GridOptions, type GridType } from "@/components/grid";
 import Button, { type ButtonType } from "@/components/button";
 
 import { showToast } from "@/utils/message";
@@ -22,7 +21,6 @@ export default function CategoriesPage() {
       useCascadingCheckbox: true,
     },
     columns: [
-      { header: "ID", name: "id" },
       {
         header: "이름",
         name: "name",
@@ -58,12 +56,15 @@ export default function CategoriesPage() {
     else gridRef.current!.setGridData(data.list);
   }, []);
 
-  const deleteCategory = useCallback(async (categoryId: number) => {
-    DeleteCategory(categoryId).then((res) => {
-      showToast({ message: res.message });
-      if (res.ok) getCategoryList();
-    });
-  }, []);
+  const deleteCategory = useCallback(
+    async (categoryId: number) => {
+      DeleteCategory(categoryId).then((res) => {
+        showToast({ message: res.message });
+        if (res.ok) getCategoryList();
+      });
+    },
+    [getCategoryList],
+  );
 
   useEffect(() => {
     getCategoryList();
