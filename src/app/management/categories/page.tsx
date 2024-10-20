@@ -35,26 +35,11 @@ export default function CategoriesPage() {
     contextMenu: null,
   };
 
-  const handleButtonClick = (p: "umount" | "expandAll" | "collapseAll") => {
-    switch (p) {
-      case "umount":
-        deleteCategory(2);
-        // gridRef.current?.unmount();
-        break;
-      case "expandAll":
-        gridRef.current?.expandAll();
-        break;
-      case "collapseAll":
-        gridRef.current?.collapseAll();
-        break;
-    }
-  };
-
   const getCategoryList = useCallback(async () => {
     const res: Response = await fetch("/api/products/categories");
     const data = await res.json();
     if (!res.ok) showToast({ message: data.message });
-    else gridRef.current!.setGridData(data.list);
+    else gridRef.current!.self!.resetData(data.list);
   }, []);
 
   const deleteCategory = useCallback(
@@ -76,31 +61,13 @@ export default function CategoriesPage() {
       <header className="mb-1.5 flex items-center justify-between">
         <h1 className="font-bold text-gray-600">카테고리 관리</h1>
         <div className="flex gap-1">
-          <Button
-            ref={buttonRef}
-            type="button"
-            color="blue"
-            size="xs"
-            onClick={() => handleButtonClick("umount")}
-          >
+          <Button ref={buttonRef} type="button" color="blue" size="xs">
             그리드 제거
           </Button>
-          <Button
-            ref={buttonRef}
-            type="button"
-            color="blue"
-            size="xs"
-            onClick={() => handleButtonClick("expandAll")}
-          >
+          <Button ref={buttonRef} type="button" color="blue" size="xs">
             모든 행 열기
           </Button>
-          <Button
-            ref={buttonRef}
-            type="button"
-            color="blue"
-            size="xs"
-            onClick={() => handleButtonClick("collapseAll")}
-          >
+          <Button ref={buttonRef} type="button" color="blue" size="xs">
             모든 행 닫기
           </Button>
         </div>

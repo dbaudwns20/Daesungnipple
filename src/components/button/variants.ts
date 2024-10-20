@@ -41,11 +41,11 @@ export const ButtonVariants = cva(
         white: "bg-white text-gray-900 focus:outline-gray-200",
       },
       size: {
-        xs: "h-8 px-2 py-1 text-xs",
-        sm: "h-10 px-2 py-1.5 text-sm",
-        md: "h-12 px-4 py-2 text-base",
-        lg: "h-14 px-6 py-3 text-lg",
-        xl: "h-16 px-8 py-3 text-xl",
+        xs: "h-7 px-1.5 text-xs",
+        sm: "h-9 px-2 text-sm",
+        md: "h-10 px-3 text-base",
+        lg: "h-12 px-4 text-lg",
+        xl: "h-14 px-5 text-xl",
       },
     },
     defaultVariants: {

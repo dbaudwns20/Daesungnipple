@@ -1,3 +1,4 @@
+import ToastUiGrid from "tui-grid";
 import { type OptGrid } from "tui-grid/types/options";
 
 export type GridOptions = {
@@ -9,9 +10,5 @@ export type GridProps = {
 };
 
 export type GridType = {
-  setGridData: (newData: any) => void;
-  unmount: () => void;
-  expandAll: () => void;
-  collapseAll: () => void;
-  element: HTMLDivElement | null;
+  self: ToastUiGrid | null;
 };
