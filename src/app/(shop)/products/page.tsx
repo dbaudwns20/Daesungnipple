@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import type { Product } from "@/types/product";
+import type { Product } from "@/types";
 import useFetch from "@/hooks/fetch";
 import { showToast } from "@/utils/message";
 import Button from "@/components/button";

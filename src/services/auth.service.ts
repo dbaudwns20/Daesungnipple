@@ -1,4 +1,4 @@
-import { Provider, SendMethod } from "@/types/common";
+import { Provider, SendMethod } from "@/types";
 
 import { EMAIL_RULE, PASSWORD_RULE, PHONE_RULE } from "@/utils/validator";
 import { comparePassword, encryptPassword } from "@/utils/password";
