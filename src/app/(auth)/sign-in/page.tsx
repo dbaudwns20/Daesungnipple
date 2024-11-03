@@ -1,12 +1,19 @@
 "use client";
 
-import { useState, useRef, useEffect, useTransition, FormEvent } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  useTransition,
+  FormEvent,
+  ChangeEvent,
+} from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-import Input, { type InputType } from "@/components/input/input";
-import Button, { type ButtonType } from "@/components/button";
-import OAuthProviders from "@/components/oauth-providers/oauth.providers";
+import Input, { type InputType } from "@/components/input";
+import Button from "@/components/button";
+import OAuthProviders from "@/components/oauth-providers";
 
 import { SignInAction } from "@/actions/auth.actions";
 
@@ -46,20 +53,26 @@ export default function SignIn() {
       <form className="w-full" onSubmit={handleSubmit} noValidate>
         <Input
           ref={emailRef}
-          inputType="text"
-          inputValue={email}
-          onChange={setEmail}
+          name="email"
+          type="email"
+          value={email}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setEmail(e.target.value)
+          }
           required={{
             isRequired: true,
             invalidMessage: "이메일을 입력해주세요",
           }}
-          labelText="이메일"
+          label="이메일"
         />
         <Input
-          inputType="password"
-          inputValue={password}
-          onChange={setPassword}
-          labelText="비밀번호"
+          name="password"
+          type="password"
+          value={password}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setPassword(e.target.value)
+          }
+          label="비밀번호"
           required={{
             isRequired: true,
             invalidMessage: "비밀번호를 입력해주세요",

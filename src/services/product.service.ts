@@ -1,68 +1,45 @@
-import { prisma } from "@/prisma";
-import { bindFrom, bindFromArray } from "@/types/bind";
-import { validateListOption } from "@/types/sarch.option";
 import type {
   Product,
-  ProductImage,
-  ProductDetailImage,
-  ProductOption,
   ProductListOption
-} from "@/types/product";
+} from "@/types";
+import { validateListOption } from "@/types";
 import {
-  dataFromProduct,
-  dataFromProductImage,
-  dataFromProductDetailImage,
-  dataFromProductOption
-} from "@/types/product";
+  createProductDB,
+  updateProductDB,
+  softDeleteProductDB,
+  hardDeleteProductDB,
+  getProductDB,
+  getAliveProductDB,
+  listCategorizedProductDB,
+  listNotCategorizedProductDB, countCategorizedProductDB, countNotCategorizedProductDB
+} from "@/database/product";
 
 /**
  * 상품 만들기
- * @param product
+ * - 상품 기본 정보 생성
+ * - 상품 대표 이미지 설정한 경우 생성, images.length > 0 OR mainImageUrl 값이 있는 경우
+ * - 상품 상세설명 이미지 설정한 경우 생성, detailImages.length > 0
+ * - 상품 옵션 설정한 경우 생성, options.length > 0
+ * - 상품 카테고리 설정했는데 카테고리 테이블에 없는 경우 생성
+ * - 상품 제조사 설정했는데 제조사 테이블에 없는 경우 생성
+ * @param product, 상품 데이터
+ * @param createCategory, 카테고리가 지정되었을 때 테이블에 없다면 함께 생성 여부 (default: false)
+ * @param createManufacturer, 제조사가 지정되었을 때 테이블에 없다면 함께 생성 여부 (default: false)
  * @returns void
  */
-export async function createProduct(product: Product | null) {
-  if (!product) throw new Error("상품 정보가 없습니다.");
+export async function createProduct(product: Product | null, createCategory: boolean = false, createManufacturer: boolean = false) {
+  if (!product) throw new Error("상품 정보가 없습니다");
   try {
-    await prisma.$transaction(async (tx) => {
-      // 상품 만들기
-      const newProduct = await tx.product.create({
-        data: dataFromProduct(product)
-      });
-
-      // 이미지 생성
-      const images: ProductImage[] = product.images;
-      if (images) {
-        for (let i = 0; i < images.length; i++) {
-          await tx.productImage.create({
-            data: dataFromProductImage(newProduct.id, images[i].url, i)
-          });
-        }
-      } else if (product.mainImageUrl) {
-        await tx.productImage.create({
-          data: dataFromProductImage(newProduct.id, product.mainImageUrl, 0)
-        });
-      }
-
-      // 상세설명 이미지 생성
-      const detailImages: ProductDetailImage[] = product.detailImages;
-      if (detailImages) {
-        for (let i = 0; i < detailImages.length; i++) {
-          await tx.productDetailImage.create({
-            data: dataFromProductDetailImage(newProduct.id, detailImages[i].url, i)
-          });
-        }
-      }
-
-      // 상품 옵션 생성
-      const options: ProductOption[] = product.options;
-      if (options) {
-        for (let i = 0; i < options.length; i++) {
-          await tx.productOption.create({
-            data: dataFromProductOption(newProduct.id, options[i])
-          });
-        }
-      }
-    });
+    // 상품 만들기
+    await createProductDB(product);
+    // 카테고리가 지정되었는데 테이블에 없다면 함께 생성
+    if (product.category && product.category.id == 0 && createCategory) {
+      // TODO create category if not exists in category table
+    }
+    // 제조사가 지정되었는데 테이블에 없다면 함께 생성
+    if (product.manufacturer && product.manufacturer.id == 0 && createManufacturer) {
+      // TODO create manufacturer if not exists in manufacturer table
+    }
   } catch (e: any) {
     throw new Error(e.message);
   }
@@ -70,66 +47,30 @@ export async function createProduct(product: Product | null) {
 
 /**
  * 상품 수정하기
- * @param product
- * @returns Product
+ * - 상품 기본 정보 수정
+ * - 상품 대표 이미지 수정, images.length > 0 OR mainImageUrl 값이 있는 경우 (삭제 => 새로 생성)
+ * - 상품 상세설명 이미지 수정, detailImages.length > 0 (삭제 => 새로 생성)
+ * - 상품 옵션 수정, options.length > 0 (삭제 => 새로 생성)
+ * - 상품 카테고리 설정했는데 카테고리 테이블에 없는 경우 생성
+ * - 상품 제조사 설정했는데 제조사 테이블에 없는 경우 생성
+ * @param product, 상품 데이터
+ * @param createCategory, 카테고리가 지정되었을 때 테이블에 없다면 함께 생성 여부 (default: false)
+ * @param createManufacturer, 제조사가 지정되었을 때 테이블에 없다면 함께 생성 여부 (default: false)
+ * @returns Product, 수정된 상품 데이터
  */
-export async function updateProduct(product: Product | null): Promise<Product> {
+export async function updateProduct(product: Product | null, createCategory: boolean = false, createManufacturer: boolean = false): Promise<Product> {
   if (!product) throw new Error("상품 정보가 없습니다.");
   try {
-    await prisma.$transaction(async (tx) => {
-      // 상품 수정하기
-      await tx.product.update({
-        where: { id: product.id },
-        data: dataFromProduct(product)
-      });
-
-      // 이미지 수정, 삭제 => 새로 생성
-      await tx.productImage.deleteMany({ where: { productId: product.id } });
-      const images: ProductImage[] = product.images;
-      if (images) {
-        const newImages: ProductImage[] = [];
-        for (let i = 0; i < images.length; i++) {
-          const newImage = await tx.productImage.create({
-            data: dataFromProductImage(product.id, images[i].url, i)
-          });
-          newImages.push(newImage);
-        }
-        product.images = newImages;
-      } else if (product.mainImageUrl) {
-        const newImage = await tx.productImage.create({
-          data: dataFromProductImage(product.id, product.mainImageUrl, 0)
-        });
-        product.images = [ newImage ];
-      }
-
-      // 상세설명 이미지 수정, 삭제 => 새로 생성
-      await tx.productDetailImage.deleteMany({ where: { productId: product.id } });
-      const detailImages: ProductDetailImage[] = product.detailImages;
-      if (detailImages) {
-        const newDetailImages: ProductDetailImage[] = [];
-        for (let i = 0; i < detailImages.length; i++) {
-          const newDetailImage = await tx.productDetailImage.create({
-            data: dataFromProductDetailImage(product.id, detailImages[i].url, i)
-          });
-          newDetailImages.push(newDetailImage);
-        }
-        product.detailImages = newDetailImages;
-      }
-
-      // 상품 옵션 수정, 삭제 => 새로 생성
-      await tx.productOption.deleteMany({ where: { productId: product.id } });
-      const options: ProductOption[] = product.options;
-      if (options) {
-        const newOptions: ProductOption[] = [];
-        for (let i = 0; i < options.length; i++) {
-          const newOption = await tx.productOption.create({
-            data: dataFromProductOption(product.id, options[i])
-          });
-          newOptions.push(newOption);
-        }
-        product.options = newOptions;
-      }
-    });
+    // 상품 수정하기
+    product = await updateProductDB(product);
+    // 카테고리가 지정되었는데 테이블에 없다면 함께 생성
+    if (product.category && product.category.id == 0 && createCategory) {
+      // TODO create category if not exists in category table
+    }
+    // 제조사가 지정되었는데 테이블에 없다면 함께 생성
+    if (product.manufacturer && product.manufacturer.id == 0 && createManufacturer) {
+      // TODO create manufacturer if not exists in manufacturer table
+    }
     return product;
   } catch (e: any) {
     throw new Error(e.message);
@@ -139,27 +80,23 @@ export async function updateProduct(product: Product | null): Promise<Product> {
 /**
  * 상품 삭제하기
  * @param id
- * @param hardDelete (default: false)
+ * @param hardDelete, 완전 삭제 여부 (default: false)
  * @returns void
  */
-export async function deleteProduct(id: number, hardDelete: boolean = false) {
+export async function deleteProduct(id: string, hardDelete: boolean = false) {
+  // FIXME: 현재 무조건 Soft Delete, 상품을 이미 주문했는데 완전히 삭제하면 문제가 생길 수 있음
+  // FIXME: Soft, Hard Delete 의 차이를 코드로 남기기 위해서 파라미터 추가
+  hardDelete = false;
+
   try {
-    await prisma.$transaction(async (tx) => {
-      // 상품 삭제하기
-      if (!hardDelete) {
-        // @ts-ignore
-        await tx.product.softDelete({ id: id });
-      } else {
-        // 상품 삭제
-        await tx.product.delete({ where: { id: id } });
-        // 이미지 삭제
-        await tx.productImage.deleteMany({ where: { productId: id } });
-        // 상세설명 이미지 삭제
-        await tx.productDetailImage.deleteMany({ where: { productId: id } });
-        // 상품 옵션 삭제
-        await tx.productOption.deleteMany({ where: { productId: id } });
-      }
-    });
+    // 상품 삭제하기
+    if (!hardDelete) {
+      // 삭제 플래그만 수정하고 관련 데이터 유지
+      await softDeleteProductDB(id);
+    } else {
+      // 완전히 삭제하고 관련 데이터 모두 삭제
+      await hardDeleteProductDB(id);
+    }
   } catch (e: any) {
     throw new Error(e.message);
   }
@@ -167,117 +104,60 @@ export async function deleteProduct(id: number, hardDelete: boolean = false) {
 
 /**
  * 상품 조회하기
+ * - 삭제된 것을 포함해서 조회할지 여부를 선택할 수 있음
  * @param id
- * @param allowDeleted (default: false)
+ * @param allowDeleted, 삭제된 것도 조회 가능 여부 (default: false)
  * @returns Product
  */
-export async function getProduct(id: number, allowDeleted: boolean = false): Promise<Product> {
+export async function getProduct(id: string, allowDeleted: boolean = false): Promise<Product | null> {
   try {
-    let where: any = { AND: [ { id: id }, { deletedAt: null } ] };
-    if (allowDeleted) {
-      where = { id: id };
-    }
-    const res = await prisma.product.findFirst({ where: where });
-    return bindFrom<Product>(res);
+    // 삭제된 것도 포함해서 조회
+    if (allowDeleted) return await getProductDB(id);
+
+    // 삭제된 것은 조회하지 않음
+    return await getAliveProductDB(id);
   } catch (e: any) {
     throw new Error(e.message);
   }
 }
 
 /**
- * 상품 리스트 조회하기
+ * 조건에 해당하는 상품 리스트 조회하기
+ * - 이름으로 검색, LIKE 검색
+ * - 지정된 카테고리로 검색, 하위 카테고리도 포함
+ * - 전체, 삭제되지 않은 것만, 삭제된 것만 조회 가능
  * @param opt
  * @returns Product[]
  */
 export async function listProduct(opt: ProductListOption): Promise<Product[]> {
   try {
     const validatedOption = validateListOption<ProductListOption>(opt);
-    if (validatedOption.categoryId) {
-      return listCategorizedProduct(validatedOption);
-    } else {
-      return listNotCategorizedProduct(validatedOption);
-    }
+    // TODO implement 카테고리를 검색 키워드로 하는 경우
+    if (validatedOption.categoryId && validatedOption.categoryId !== 0)
+      return await listCategorizedProductDB(validatedOption);
+
+    // 카테고리를 검색 키워드로 하지 않는 경우
+    return await listNotCategorizedProductDB(validatedOption);
   } catch (e: any) {
     throw new Error(e.message);
   }
 }
 
 /**
- * 카테고리를 검색 키워드로 하는 경우
+ * 조건에 해당하는 상품 리스트 총 개수 조회하기
  * @param opt
- * @returns Product[]
+ * @returns number
  */
-async function listCategorizedProduct(opt: ProductListOption): Promise<Product[]> {
-  /*
-  // @ts-ignore
-      res = await prisma.product.$queryRaw`
-          WITH RECURSIVE CategoryHierarchy AS (SELECT id, parent_id
-                                               FROM product_category
-                                               WHERE id = ${ categoryId }
-                                                 AND deleted_at IS NULL
-                                               UNION ALL
-                                               SELECT c.id, c.parent_id
-                                               FROM product_category c
-                                                        INNER JOIN CategoryHierarchy ch ON c.parent_id = ch.id) AND c.deleted_at IS NULL
-          SELECT p.*
-          FROM tbl_product AS p
-          WHERE p.category_id IN (SELECT id FROM CategoryHierarchy)
-            AND p.deleted_at IS NULL
-          ORDER BY ${ opt.orderBy } ${ opt.orderDirection }
-          LIMIT ${ opt.unit }
-          OFFSET ${ (opt.page - 1) * opt.unit };
-      `;
-   */
-  return [] as Product[];
-}
+export async function countProduct(opt: ProductListOption): Promise<number> {
+  try {
+    const validatedOption = validateListOption<ProductListOption>(opt);
+    // TODO implement 카테고리를 검색 키워드로 하는 경우
+    if (validatedOption.categoryId && validatedOption.categoryId !== 0)
+      return await countCategorizedProductDB(validatedOption);
 
-/**
- * 카테고리를 검색 키워드로 하지 않는 경우
- * @param opt
- * @returns Product[]
- */
-async function listNotCategorizedProduct(opt: ProductListOption): Promise<Product[]> {
-  let where: any = { deletedAt: null };
-  if (opt.name && opt.name !== "") {
-    where = { AND: [ { name: { contains: opt.name } }, { deletedAt: null } ] };
+    // 카테고리를 검색 키워드로 하지 않는 경우
+    return await countNotCategorizedProductDB(validatedOption);
+  } catch (e: any) {
+    throw new Error(e.message);
   }
-  /*
-  const res = await prisma.product.$queryRaw`
-          SELECT *
-          FROM product
-          WHERE deleted_at IS NULL
-          ORDER BY ${ opt.orderBy } ${ opt.orderDirection }
-          LIMIT ${ opt.unit }
-          OFFSET ${ (opt.page - 1) * opt.unit };
-      `;
-   */
-  const res = await prisma.product.findMany({
-    where: where,
-    orderBy: { createdAt: "desc" },
-    skip: (opt.page - 1) * opt.unit,
-    take: opt.unit,
-    // relations
-    include: {
-      // 상품 이미지 함께 조회
-      images: {
-        select: {
-          url: true // url 만 조회
-        },
-        where: { viewOrder: 0 } // 대표 이미지만 조회
-      },
-      // 제조사 조회
-      manufacturer: {
-        select: {
-          name: true // 제조사명만 조회
-        },
-        where: { deletedAt: null } // 삭제되지 않은 제조사만 조회
-      },
-      category: {
-        select: {
-          name: true // 카테고리명만 조회
-        }
-      }
-    }
-  });
-  return bindFromArray<Product>(res);
 }

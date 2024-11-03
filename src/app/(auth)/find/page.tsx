@@ -7,12 +7,13 @@ import {
   useEffect,
   useCallback,
   FormEvent,
+  ChangeEvent,
 } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-import Input, { type InputType } from "@/components/input/input";
-import Button, { type ButtonType } from "@/components/button";
+import Input, { type InputType } from "@/components/input";
+import Button from "@/components/button";
 
 import { FindUserEmail, SendPasswordRestEmail } from "@/actions/auth.actions";
 import { forceRedirect } from "@/actions";
@@ -114,9 +115,12 @@ export default function Find() {
               <>
                 <Input
                   ref={emailRef}
-                  inputType="email"
-                  inputValue={email}
-                  onChange={setEmail}
+                  type="email"
+                  name="email"
+                  value={email}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setEmail(e.target.value)
+                  }
                   required={{
                     isRequired: true,
                     invalidMessage: "이메일을 입력해주세요",
@@ -125,7 +129,7 @@ export default function Find() {
                     regExp: EMAIL_RULE,
                     invalidMessage: "올바른 이메일 형식이 아닙니다",
                   }}
-                  labelText="이메일"
+                  label="이메일"
                 />
                 <Button
                   type="submit"
@@ -155,20 +159,26 @@ export default function Find() {
               <>
                 <Input
                   ref={nameRef}
-                  inputType="text"
-                  inputValue={name}
-                  onChange={setName}
+                  type="text"
+                  name="name"
+                  value={name}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setName(e.target.value)
+                  }
                   required={{
                     isRequired: true,
                     invalidMessage: "이름을 입력해주세요",
                   }}
-                  labelText="이름"
+                  label="이름"
                 />
                 <Input
-                  inputType="text"
-                  inputValue={mobilePhone}
-                  onChange={setMobilePhone}
-                  labelText="휴대전화번호"
+                  type="tel"
+                  name="mobilePhone"
+                  value={mobilePhone}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setMobilePhone(e.target.value)
+                  }
+                  label="휴대전화번호"
                   required={{
                     isRequired: true,
                     invalidMessage: "휴대전화번호를 입력해주세요",

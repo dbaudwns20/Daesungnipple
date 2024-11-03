@@ -1,7 +1,7 @@
 "use server";
 
 import { deleteCategory } from "@/services/category.service";
-import { type ActionResponse } from "@/types/common";
+import type { ActionResponse } from "@/types";
 
 /**
  * 카테고리 제거

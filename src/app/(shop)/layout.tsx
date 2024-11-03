@@ -1,5 +1,5 @@
-import Footer from "@/components/footer/footer";
-import Header from "@/components/header/header";
+import Footer from "@/components/footer";
+import Header from "@/components/header";
 
 import { auth } from "@/auth";
 import { SessionProvider } from "next-auth/react";

@@ -5,12 +5,13 @@ import {
   useRef,
   useEffect,
   useTransition,
-  FormEvent,
   useCallback,
+  FormEvent,
+  ChangeEvent,
 } from "react";
 import { useSearchParams } from "next/navigation";
 
-import Input, { type InputType } from "@/components/input/input";
+import Input, { type InputType } from "@/components/input";
 import Button, { type ButtonType } from "@/components/button";
 
 import {
@@ -92,10 +93,13 @@ export default function ResetPassword() {
           <form className="w-full" onSubmit={handleSubmit} noValidate>
             <Input
               ref={passwordRef}
-              inputType="password"
-              inputValue={password}
-              onChange={setPassword}
-              labelText="신규 비밀번호"
+              type="password"
+              name="password"
+              value={password}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setPassword(e.target.value)
+              }
+              label="신규 비밀번호"
               required={{
                 isRequired: true,
                 invalidMessage: "비밀번호를 입력해주세요",
@@ -107,10 +111,13 @@ export default function ResetPassword() {
               }}
             />
             <Input
-              inputType="password"
-              inputValue={passwordCheck}
-              onChange={setPasswordCheck}
-              labelText="신규 비밀번호확인"
+              type="password"
+              name="passwordCheck"
+              value={passwordCheck}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setPasswordCheck(e.target.value)
+              }
+              label="신규 비밀번호확인"
               required={{
                 isRequired: true,
                 invalidMessage: "비밀번호확인을 입력해주세요",

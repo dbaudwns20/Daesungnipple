@@ -1,10 +1,17 @@
 "use client";
 
-import { useState, useRef, useEffect, useTransition, FormEvent } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  useTransition,
+  FormEvent,
+  ChangeEvent,
+} from "react";
 import { useSearchParams } from "next/navigation";
 
-import Input, { type InputType } from "@/components/input/input";
-import Button, { type ButtonType } from "@/components/button";
+import Input, { type InputType } from "@/components/input";
+import Button from "@/components/button";
 
 import { SignUpAction } from "@/actions/auth.actions";
 import { forceRedirect } from "@/actions";
@@ -70,9 +77,12 @@ export default function SignUp() {
       <form className="w-full" onSubmit={handleSubmit} noValidate>
         <Input
           ref={emailRef}
-          inputType="email"
-          inputValue={email}
-          onChange={setEmail}
+          type="email"
+          name="email"
+          value={email}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setEmail(e.target.value)
+          }
           isDisabled={isOAuthSignUp}
           required={{
             isRequired: true,
@@ -82,15 +92,18 @@ export default function SignUp() {
             regExp: EMAIL_RULE,
             invalidMessage: "올바른 이메일 형식이 아닙니다",
           }}
-          labelText="이메일"
+          label="이메일"
         />
         {provider === "" ? (
           <>
             <Input
-              inputType="password"
-              inputValue={password}
-              onChange={setPassword}
-              labelText="비밀번호"
+              type="password"
+              name="password"
+              value={password}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setPassword(e.target.value)
+              }
+              label="비밀번호"
               required={{
                 isRequired: true,
                 invalidMessage: "비밀번호를 입력해주세요",
@@ -102,10 +115,13 @@ export default function SignUp() {
               }}
             />
             <Input
-              inputType="password"
-              inputValue={passwordCheck}
-              onChange={setPasswordCheck}
-              labelText="비밀번호확인"
+              type="password"
+              name="passwordCheck"
+              value={passwordCheck}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setPasswordCheck(e.target.value)
+              }
+              label="비밀번호확인"
               required={{
                 isRequired: true,
                 invalidMessage: "비밀번호확인을 입력해주세요",
@@ -121,20 +137,26 @@ export default function SignUp() {
         )}
         <Input
           ref={nameRef}
-          inputType="text"
-          inputValue={name}
-          onChange={setName}
-          labelText="이름"
+          name="name"
+          type="text"
+          value={name}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setName(e.target.value)
+          }
+          label="이름"
           required={{
             isRequired: true,
             invalidMessage: "이름을 입력해주세요",
           }}
         />
         <Input
-          inputType="tel"
-          inputValue={mobilePhone}
-          onChange={setMobilePhone}
-          labelText="휴대전화번호"
+          type="tel"
+          name="mobilePhone"
+          value={mobilePhone}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setMobilePhone(e.target.value)
+          }
+          label="휴대전화번호"
           required={{
             isRequired: true,
             invalidMessage: "휴대전화번호를 입력해주세요",

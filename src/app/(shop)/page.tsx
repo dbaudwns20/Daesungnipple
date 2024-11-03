@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import Modal from "@/components/modal/modal";
+import Modal from "@/components/modal";
 import Button from "@/components/button";
 
 import { showToast } from "@/utils/message";
