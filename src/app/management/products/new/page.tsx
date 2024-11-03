@@ -11,9 +11,13 @@ import {
 import { useFormData } from "@/hooks";
 
 import Input, { type InputType } from "@/components/input";
-import Grid, { type GridOptions, type GridType } from "@/components/grid";
+import {
+  Grid,
+  CustomCell,
+  type GridOptions,
+  type GridType,
+} from "@/components/grid";
 import Button from "@/components/button";
-import EditingCell from "@/components/grid/EditingCell";
 
 type NewProduct = {
   name: string;
@@ -26,14 +30,28 @@ export default function ProductNew() {
   const nameRef = useRef<InputType>(null);
   const gridRef = useRef<GridType>();
 
-  const removeOption = (rowIndex: number) => {
-    gridRef.current?.self?.removeRow(rowIndex);
+  // grid func & values
+  const addOption = () => {
+    gridRef.current!.self!.appendRow({
+      name: "",
+      price: 0,
+    });
+    gridRef.current!.self!.startEditing(
+      gridRef.current!.self!.getRowCount() - 1,
+      "name",
+      true,
+    );
+  };
+
+  const removeOption = () => {
+    const rowKey: string | number | null =
+      gridRef.current!.self!.getFocusedCell().rowKey;
+    if (rowKey !== null) gridRef.current!.self!.removeRow(rowKey);
   };
 
   const gridOptions = useMemo<GridOptions>(() => {
     return {
       scrollX: false,
-      rowHeaders: ["checkbox"],
       draggable: true,
       columns: [
         {
@@ -51,9 +69,20 @@ export default function ProductNew() {
           name: "",
           width: 100,
           renderer: {
-            type: EditingCell,
+            type: CustomCell,
             options: {
-              removeOption,
+              tag: "div",
+              className: ["flex", "items-center", "justify-center", "gap-1"],
+              content: (
+                <Button
+                  type="button"
+                  color="red"
+                  size="xs"
+                  onClick={removeOption}
+                >
+                  삭제
+                </Button>
+              ),
             },
           },
         },
@@ -68,13 +97,6 @@ export default function ProductNew() {
     price: 0,
   });
 
-  const addNewOption = () => {
-    gridRef.current?.self?.appendRow({
-      name: "",
-      price: 0,
-    });
-  };
-
   useEffect(() => {
     nameRef.current?.setFocus();
   }, []);
@@ -84,8 +106,8 @@ export default function ProductNew() {
       <header className="mb-1.5 flex h-8 items-center justify-between">
         <h1 className="font-bold text-gray-600">상품 추가</h1>
       </header>
-      <form className="">
-        <p className="mb-1.5 text-sm font-semibold text-gray-400">상품 정보</p>
+      <form className="w-full p-5">
+        <p className="mb-2.5 text-sm font-semibold text-gray-400">상품 정보</p>
         <Input
           ref={nameRef}
           type="text"
@@ -104,7 +126,21 @@ export default function ProductNew() {
         <Input
           type="text"
           name="modelName"
-          label="모델명"
+          label="카테고리"
+          value={formData.modelName}
+          required={{
+            isRequired: true,
+            invalidMessage: "카테고리를 선택해주세요.",
+          }}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+            bindFormData("modelName", e.target.value);
+          }}
+          valueRange={[2, 999]}
+        />
+        <Input
+          type="text"
+          name="modelName"
+          label="모델"
           value={formData.modelName}
           required={{
             isRequired: true,
@@ -115,7 +151,6 @@ export default function ProductNew() {
           }}
           valueRange={[2, 999]}
         />
-
         <Input
           type="number"
           name="price"
@@ -131,20 +166,29 @@ export default function ProductNew() {
           step={1000}
           valueRange={[0, 9999999999]}
         />
-        <div className="flex items-center justify-between">
-          <p className="mb-1.5 text-sm font-semibold text-gray-400">
-            상품 옵션
-          </p>
-          <div className="flex gap-1">
-            <a
-              className="text-xs font-semibold text-blue-500 hover:cursor-pointer hover:text-blue-600"
-              onClick={addNewOption}
-            >
-              + 옵션 추가
-            </a>
+        <p className="mb-2.5 text-sm font-semibold text-gray-400">배송 정보</p>
+        <div className="mb-3 block">
+          <div className="flex items-center justify-between">
+            <p className="mb-2.5 text-sm font-semibold text-gray-400">
+              상품 옵션
+            </p>
+            <div className="flex gap-1">
+              <a
+                className="text-xs font-semibold text-blue-500 hover:cursor-pointer hover:text-blue-600"
+                onClick={addOption}
+              >
+                + 옵션 추가
+              </a>
+            </div>
           </div>
+          <Grid ref={gridRef} gridOptions={gridOptions} />
         </div>
-        <Grid ref={gridRef} gridOptions={gridOptions} />
+        <p className="mb-2.5 text-sm font-semibold text-gray-400">
+          상품 이미지
+        </p>
+        <p className="mb-2.5 text-sm font-semibold text-gray-400">
+          상품 상세 이미지
+        </p>
       </form>
     </>
   );
