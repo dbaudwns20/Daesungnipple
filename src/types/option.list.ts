@@ -1,4 +1,4 @@
-import { SearchOption, validateSearchOption } from "@/types";
+// import { SearchOption, validateSearchOption } from "@/types";
 
 /**
  * 리스트 조회 옵션
@@ -9,7 +9,7 @@ import { SearchOption, validateSearchOption } from "@/types";
 export type ListOption = {
   page: number; // offset = (page - 1) * limit
   unit: number; // limit
-  searchOption: SearchOption; // 삭제된 데이터를 포함한 조회 옵션
+  // searchOption: SearchOption; // 삭제된 데이터를 포함한 조회 옵션
   // orderBy: string // 정렬 기준
   // orderDirection: string // 정렬 방향
 }
@@ -28,18 +28,10 @@ export function validateListOption<T>(opt: Partial<ListOption>): T {
   // 한 페이지에 보여줄 개수 설정 안되어 있으면 20
   if (!opt.unit || opt.unit < 1) opt.unit = 20;
   // 조회 옵션 설정 안되어 있으면 ALL
-  opt.searchOption = validateSearchOption(opt.searchOption);
+  // opt.searchOption = validateSearchOption(opt.searchOption);
 
   // if (!opt.orderBy || opt.orderBy === "") opt.orderBy = "created_at";
   // if (!opt.orderDirection || (opt.orderDirection !== "ASC" && opt.orderDirection !== "DESC"))
   //   opt.orderDirection = "DESC";
   return opt as T;
-}
-
-/**
- * 리스트 조회 결과
- */
-export type ListResult = {
-  list: any[];
-  totalCount: number;
 }
