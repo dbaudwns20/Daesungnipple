@@ -104,19 +104,56 @@ model PasswordUpdateLog {
 
 // -------------------------------------------------- 제조사 --------------------------------------------------
 
-// 제조사
+// TODO implement later 제조사
 model Manufacturer {
-  id        Int       @id @default(autoincrement())
-  name      String    @map("name") @db.VarChar(255) // 제조사명
-  siteUrl   String    @default("") @map("site_url") @db.VarChar(2000) // 제조사 홈페이지 링크
-  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
-  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
-  products  Product[]
+  id        Int      @id @default(autoincrement())
+  name      String   @map("name") @db.VarChar(255) // 제조사명
+  siteUrl   String   @default("") @map("site_url") @db.VarChar(2000) // 제조사 홈페이지 링크
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
 
+  // TODO implement later
+  // products  Product[]
+  @@index([name])
   @@map("manufacturer")
 }
 
 // -------------------------------------------------- 상품 --------------------------------------------------
+
+// TODO implement later 상품 카테고리
+// TODO 아이템 카테고리가 필요하면? -> 그때 item_type 등으로 따로 구현
+model Category {
+  id        Int      @id @default(autoincrement())
+  parentId  Int?     @map("parent_id") // 상위 카테고리 ID
+  name      String   @map("name") @db.VarChar(255) // 카테고리명
+  isActive  Boolean  @default(true) @map("is_active") // 사용여부
+  viewOrder Int      @default(1) @map("view_order") // 정렬순서
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
+
+  // TODO implement later
+  // product   Product[]
+  children Category[] @relation("CategoryHierarchy")
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+
+  @@index([parentId])
+  @@map("category")
+}
+
+// TODO 물건(item) 이미지와 상품(product) 이미지를 구분했음 컬럼이 다름
+// 물건 이미지
+model ItemImage {
+  id        Int      @id @default(autoincrement())
+  itemId    Int      @map("item_id")
+  url       String   @default("") @map("url") @db.VarChar(2000)
+  viewOrder Int      @default(0) @map("view_order") // 이미지 순서
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+
+  item Item @relation(fields: [itemId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([itemId])
+  @@map("item_image")
+}
 
 // 상품 이미지
 model ProductImage {
@@ -125,86 +162,138 @@ model ProductImage {
   url       String   @default("") @map("url") @db.VarChar(2000)
   viewOrder Int      @default(0) @map("view_order") // 이미지 순서
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
-  product   Product  @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  product Product @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([productId])
   @@map("product_image")
 }
 
-// 상품 상세설명 이미지
-model ProductDetailImage {
-  id        Int      @id @default(autoincrement())
-  productId String   @map("product_id")
-  url       String   @default("") @map("url") @db.VarChar(2000)
-  viewOrder Int      @default(0) @map("view_order") // 이미지 순서
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
-  product   Product  @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+// 상품
+model Product {
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamp(0)
 
-  @@index([productId])
-  @@map("product_detail_image")
+  // TODO 추가로 고려할 것 ❗️
+  //  - 최소, 최대 구매수량(N개 이상, N개 이하)
+  //  - 배송 가능 지역(국내, 해외, 특정 지역 제외), 배송 방법(직접 수령, 택배, 배달), 배송비, 배송기간
+  //  - 상품 구매 안내
+  //  - 상품 사용 후기(이 상품에 대한 리뷰)
+  //  - 상품 Q & A(이 상품에 대한 질문과 답변)
+  //  - 연관 상품
+
+  // TODO 모델 선언시 참고 링크 ❗️
+  // https://dspp.co.kr/product/%EA%B3%B5%EC%95%95%EC%8B%A4%EB%A6%B0%EB%8D%94%EC%97%90%EC%96%B4%EC%8B%A4%EB%A6%B0%EB%8D%94%ED%8C%8C%EC%B9%B4%ED%8C%8C%EC%BB%A4-%EB%8C%80%ED%98%95-gdc-125150%EC%82%AC%EC%9D%B4%EC%A6%88/6347/category/1/display/3/
+
+  name               String  @map("name") @db.VarChar(255) // 상품명 (그룹명)
+  previewDescription String  @default("") @map("preview_description") @db.VarChar(255) // 상품 요약설명, 썸네일용
+  defaultPrice       Int     @default(0) @map("default_price") // 기본 가격, 아래 옵션 선택에 따라 totalPrice 가 변경될 수 있음
+  mainImageUrl       String  @default("") @map("main_image_url") @db.VarChar(2000) // 대표 이미지
+  // TODO 모델명
+  // TODO 모델명을 직접 지정하는 경우 보여주고 빈칸이면 안보여주고, nullable 이 아닌 이유는 쿼리 편의를 위해, 퍼포먼스 차이도 없음, 빈칸과 null 이 서로 다른 의미를 갖지도 않음
+  // TODO 위 참고 링크의 제조사 아래 모델 "GDC 125~150" 부분
+  modelName          String  @default("") @map("model_name") @db.VarChar(255)
+  // TODO 상품 옵션 설명
+  // TODO 위 참고 링크의 옵션 좌측 "GDC 125-150파이" 부분
+  // TODO 빈칸인 경우 "옵션" 으로 대체해서 보여주기
+  optionDescription  String  @default("") @map("option_description") @db.VarChar(100)
+  isOptionRequired   Boolean @default(false) @map("is_option_required") // TODO 구매할 때 상품 옵션 선택이 필수인지 아닌지
+
+  // 관련 카테고리 TODO implement later
+  // categoryId Int?      @map("category_id")
+  // category   Category? @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  descriptionImages ProductImage[] // 상품 상세설명 이미지
+  options           ProductOption[] // 상품 옵션
+
+  @@index([name])
+  @@map("product")
 }
 
-// 상품 구매 옵션
+// 상품 옵션
 model ProductOption {
-  id         Int      @id @default(autoincrement())
-  productId  String   @map("product_id")
-  name       String   @map("name") @db.VarChar(255) // 옵션명
-  price      Int      @default(0) @map("price") // 옵션 추가 가격
-  stockCount Int      @default(0) @map("stock_count") // 고민 => 재고 수량, 0 이면 무제한 -1이면 품절, 1이상이면 해당 수량만큼 재고
-  isDefault  Boolean  @default(false) @map("is_default") // 기본 옵션 여부
-  viewOrder  Int      @default(0) @map("view_order") // 옵션 순서, 0이면 대표이미지
-  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamp(0)
-  product    Product  @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id        Int      @id @default(autoincrement())
+  productId String   @map("product_id") // productId: 상품 ID, 꼭 지정되어야 함
+  // TODO itemId: 물건 ID
+  // TODO 미리 등록해둔 물건을 지정하지 않고 그냥 옵션을 만들 수도 있음
+  // TODO item을 지정해서 만들었으면 해당 물건이 삭제될 때 같이 삭제됨
+  itemId    Int?     @map("item_id")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
+
+  // TODO name: 옵션명 <- 등록할 item 선택할 때 item.modelName 을 기본으로 불러와주고
+  // TODO 관리자가 원한다면 커스텀 수정 가능
+  // TODO   - SE-A 111 (1KG) <- 이런식으로 물건의 모델명 뒤에 뭔가 붙이고 싶다거나
+  // TODO   - 그런데 상품에 물건 등록할 때 옵션명을 수정하더라도 item의 modelName이 함께 수정되지는 않음
+  name      String  @map("name") @db.VarChar(255)
+  // TODO price: 이 옵션 선택했을 때 추가 비용
+  // TODO product.price + product_option.price + total.price
+  // TODO product_option.price 가 0 이면 추가 비용 없이 product.price만 적용
+  price     Int     @default(0) @map("price")
+  // TODO isDefault: 기본 옵션 여부
+  // TODO 사용자가 직접 설정하기 전에 기본 옵션으로 선택 여부
+  // TODO 설정하지 않는다면 우리가 선택해주는 기본 옵션은 없고 사용자가 직접 선택해야 함
+  isDefault Boolean @default(false) @map("is_default")
+  viewOrder Int     @default(0) @map("view_order") // 옵션 리스트 순서
+
+  product Product @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  item    Item?   @relation(fields: [itemId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([productId])
+  @@index([itemId])
   @@map("product_option")
 }
 
-// 상품 카테고리
-model ProductCategory {
+// 물건 (재고)
+model Item {
   id        Int       @id @default(autoincrement())
-  parentId  Int?      @map("parent_id") // 상위 카테고리 ID
-  name      String    @map("name") @db.VarChar(255) // 카테고리명
-  isActive  Boolean   @default(true) @map("is_active") // 사용여부
-  viewOrder Int       @default(1) @map("view_order") // 정렬순서
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
   updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
-  product   Product[]
+  deletedAt DateTime? @map("deleted_at") @db.Timestamp(0)
 
-  children ProductCategory[] @relation("ProductCategoryHierarchy")
-  parent   ProductCategory?  @relation("ProductCategoryHierarchy", fields: [parentId], references: [id])
+  name        String @default("") @map("name") @db.VarChar(255) // 물건 이름
+  description String @default("") @map("description") @db.VarChar(2000) // 물건 설명
+  // TODO 물건의 재고 수량
+  // TODO 0 이면 무제한
+  // TODO -1 이면 품절
+  // TODO 1 이상이면 해당 수량만큼 재고
+  stockCount  Int    @default(0) @map("stock_count")
 
-  @@map("product_category")
+  // 관련 제조사 TODO implement later
+  // manufacturerId Int?          @map("manufacturer_id")
+  // manufacturer   Manufacturer? @relation(fields: [manufacturerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  images        ItemImage[] // 물건 이미지
+  productOption ProductOption[] // 상품 옵션
+
+  @@index([name])
+  @@map("item")
 }
 
-// 상품
-model Product {
-  id                 String               @id @default(uuid())
-  name               String               @map("name") @db.VarChar(255) // 상품명
-  modelName          String               @default("") @map("model_name") @db.VarChar(255) // 모델명
-  mainImageUrl       String               @default("") @map("main_image_url") @db.VarChar(2000) // 대표 이미지
-  previewDescription String               @default("") @map("preview_description") @db.VarChar(255) // 상품 요약설명
-  description        String               @default("") @map("description") @db.VarChar(2000) // 상품설명
-  price              Int                  @default(0) @map("price") // 가격
-  stockCount         Int                  @default(0) @map("stock_count") // 고민 => 재고 수량, 0 이면 무제한 -1이면 품절, 1이상이면 해당 수량만큼 재고
-  createdAt          DateTime             @default(now()) @map("created_at") @db.Timestamp(0)
-  updatedAt          DateTime             @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
-  deletedAt          DateTime?            @map("deleted_at") @db.Timestamp(0)
-  exposedAt          DateTime?            @map("exposed_at") @db.Timestamp(0) // 노출 시작일
-  // 상품 이미지
-  images             ProductImage[]
-  // 상품 상세설명 이미지
-  detailImages       ProductDetailImage[]
-  // 관련 제조사
-  manufacturerId     Int?                 @map("manufacturer_id")
-  manufacturer       Manufacturer?        @relation(fields: [manufacturerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  // 관련 구매 옵션
-  optionDescription  String               @default("") @map("option_description") @db.VarChar(100) // 옵션 설명
-  options            ProductOption[]
-  // 관련 카테고리
-  categoryId         Int?                 @map("product_category_id")
-  category           ProductCategory?     @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+// TODO -------------------------------------------------- 구현 필요 --------------------------------------------------
+// 주문 정보
+// model Order {
+//   총 결제 금액
+//   결제 방법
+//   주문 상태(결제 완료, 배송 준비중, 배송 중, 배송 완료, 구매 확정, 취소 요청, 취소 완료, 환불 요청, 환불 완료)
+// }
 
-  // 배송관련 정보 & 옵션은 일단 모두 통일하는걸로
-  @@map("product")
-}
+// 상품 구매 단일 정보
+// model Purchase {
+//   주문 아이디 (그룹 아이디)
+//   구매 상품
+//   구매 개수
+//   상품 옵션
+//   결제 금액
+//   배송 정보 (상품 여러개 사면 따로따로 도착할 수 있음)
+//   배송 방법 (상품 여러개 사면 따로따로 도착할 수 있음)
+//   주문 상태(결제 완료, 배송 준비중, 배송 중, 배송 완료, 구매 확정, 취소 요청, 취소 완료, 환불 요청, 환불 완료)
+// }
+
+// 찜하기
+// model Favorite {}
+
+// 장바구니
+// model Cart {}
