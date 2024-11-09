@@ -82,7 +82,7 @@ export const Grid = forwardRef((props: GridProps, ref) => {
     initGrid();
   }, [initGrid]);
 
-  return <div ref={componentRef}></div>;
+  return <div className="h-full w-full" ref={componentRef} />;
 });
 
 Grid.displayName = "Grid";
