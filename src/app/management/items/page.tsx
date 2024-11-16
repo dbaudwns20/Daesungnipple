@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button, type ButtonProps, type ButtonType } from "@/components/button";
 import { Grid, type GridOptions, type GridType } from "@/components/grid";
+import ModalNewItem from "./components/ModalNewItem";
 
 export default function ItemsPage() {
   const router = useRouter();
@@ -12,8 +13,11 @@ export default function ItemsPage() {
   // refs
   const gridRef = useRef<GridType>(null);
 
+  // values
+  const [isShowModal, setIsShowModal] = useState<boolean>(false);
+
   const goNew = () => {
-    router.push("/management/items/new");
+    setIsShowModal(true);
   };
 
   const gridOptions = useMemo<GridOptions>(() => {
@@ -60,6 +64,7 @@ export default function ItemsPage() {
         </div>
       </header>
       <Grid ref={gridRef} gridOptions={gridOptions} />
+      {isShowModal && <ModalNewItem setIsModalOpen={setIsShowModal} />}
     </>
   );
 }

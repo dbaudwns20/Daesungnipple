@@ -17,7 +17,7 @@ import {
   type GridOptions,
   type GridType,
 } from "@/components/grid";
-import Button from "@/components/button";
+import { Button } from "@/components/button";
 
 type NewProduct = {
   name: string;
