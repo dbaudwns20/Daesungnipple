@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 import Input, { type InputType } from "@/components/input";
-import Button from "@/components/button";
+import { Button } from "@/components/button";
 import OAuthProviders from "@/components/oauth-providers";
 
 import { SignInAction } from "@/actions/auth.actions";

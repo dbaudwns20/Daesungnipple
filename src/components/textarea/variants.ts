@@ -1,9 +1,11 @@
 import { cva } from "class-variance-authority";
 
-export const InputVariants = cva(
+export const TextareaVariants = cva(
   `peer
    h-full
+   in-h-[100px]
    w-full
+   resize-none
    rounded-[7px]
    border
    border-gray-200
@@ -18,11 +20,14 @@ export const InputVariants = cva(
    outline
    outline-0
    transition-all
+   placeholder-shown:border
+   placeholder-shown:border-gray-200
    placeholder-shown:border-t-gray-200
    focus:border-2
    focus:border-blue-500
    focus:border-t-transparent
    focus:outline-0
+   disabled:resize-none
    disabled:cursor-not-allowed
    disabled:border
    disabled:bg-gray-50`,
@@ -33,6 +38,7 @@ export const InputVariants = cva(
         true: `border-red-500
                border-t-transparent
                placeholder-shown:border-t-red-500
+               placeholder-shown:border-red-500
                focus:border-red-500
                focus:border-t-transparent`,
       },
@@ -41,6 +47,7 @@ export const InputVariants = cva(
         true: `border-green-500
                border-t-transparent
                placeholder-shown:border-t-green-500
+               placeholder-shown:border-green-500
                focus:border-green-500
                focus:border-t-transparent`,
       },
