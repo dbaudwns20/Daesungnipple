@@ -39,7 +39,7 @@ export default function ManagementLayout(
         </nav>
       </header>
       <main className="h-full">
-        <section className="h-full p-3">{props.children}</section>
+        <section className="p-3">{props.children}</section>
       </main>
     </div>
   );

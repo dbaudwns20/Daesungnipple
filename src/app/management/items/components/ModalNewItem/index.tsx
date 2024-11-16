@@ -1,39 +1,62 @@
 import {
-  Dispatch,
-  SetStateAction,
   useRef,
   useEffect,
-  FormEvent,
+  useTransition,
   ChangeEvent,
+  Dispatch,
+  FormEvent,
+  SetStateAction,
 } from "react";
 
 import Modal from "@/components/modal";
 import Input, { type InputType } from "@/components/input";
 import { Textarea } from "@/components/textarea";
 import { Button } from "@/components/button";
+
 import { useFormData } from "@/hooks";
 
+import { CreateItem } from "@/actions/item.actions";
+
+import { Item } from "@/types";
+
 import { validateForm } from "@/utils/validator";
+import { showToast } from "@/utils/message";
 
 export default function ModalNewItem(props: {
   setIsModalOpen: Dispatch<SetStateAction<boolean>>;
+  completeFunction: Function;
 }) {
-  const { setIsModalOpen } = props;
+  const { setIsModalOpen, completeFunction } = props;
 
   // refs
   const nameRef = useRef<InputType>(null);
 
-  const [newItem, bindNewItem] = useFormData({
+  // values
+  const [isFetching, startTransition] = useTransition();
+  const [newItem, bindNewItem] = useFormData<Item>({
     name: "",
     stockCount: 0,
     description: "",
-  });
+  } as Item);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     // 입력값 체크
     if (!validateForm(e.target as HTMLFormElement)) return;
+
+    startTransition(async () => {
+      CreateItem(newItem).then((res) => {
+        if (res.ok) {
+          completeFunction(() => {
+            showToast({ message: res.message, color: "green" });
+            setIsModalOpen(false);
+          });
+        } else {
+          showToast({ message: res.message, color: "red" });
+        }
+      });
+    });
   };
 
   useEffect(() => {
@@ -86,7 +109,12 @@ export default function ModalNewItem(props: {
               bindNewItem("description", e.target.value);
             }}
           />
-          <Button type="submit" color="blue" additionalClass="w-full">
+          <Button
+            type="submit"
+            color="blue"
+            additionalClass="w-full"
+            isFetching={isFetching}
+          >
             저장
           </Button>
         </form>

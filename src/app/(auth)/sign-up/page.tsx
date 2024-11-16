@@ -11,7 +11,7 @@ import {
 import { useSearchParams } from "next/navigation";
 
 import Input, { type InputType } from "@/components/input";
-import Button from "@/components/button";
+import { Button } from "@/components/button";
 
 import { SignUpAction } from "@/actions/auth.actions";
 import { forceRedirect } from "@/actions";
