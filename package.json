@@ -23,7 +23,8 @@
     "react-dom": "^18",
     "swr": "^2.2.5",
     "tailwind-merge": "^2.5.2",
-    "tui-grid": "^4.21.22"
+    "tui-grid": "^4.21.22",
+    "tui-pagination": "^3.4.1"
   },
   "devDependencies": {
     "@svgr/webpack": "^8.1.0",

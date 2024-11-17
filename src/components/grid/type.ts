@@ -3,6 +3,7 @@ import { type OptGrid } from "tui-grid/types/options";
 
 export type GridOptions = {
   el?: HTMLElement; // el 은 컴포넌트 내에서 선언되기 때문에 Option 으로 변경
+  fetchingUrl: string;
 } & Omit<OptGrid, "el">;
 
 export type GridProps = {
@@ -11,4 +12,5 @@ export type GridProps = {
 
 export type GridType = {
   self: ToastUiGrid | null;
+  read: (page?: number, unit?: number) => Promise<void>;
 };
