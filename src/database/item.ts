@@ -1,13 +1,19 @@
 import { prisma } from "@/prisma";
 
 import type { Item, ItemImage, ItemSearchOption } from "@/types";
-import { bindFromArray, dataFromItem, dataFromItemImage, itemFromDB, itemListFromDB } from "@/types";
+import {
+  bindFromArray,
+  dataFromItem,
+  dataFromItemImage,
+  itemFromDB,
+  itemListFromDB,
+} from "@/types";
 
 export async function getItemDB(id: number): Promise<Item | null> {
   try {
     const res = await prisma.item.findUnique({
       where: { id: id },
-      include: { images: true }
+      include: { images: true },
     });
 
     if (!res) return null;
@@ -18,23 +24,33 @@ export async function getItemDB(id: number): Promise<Item | null> {
   }
 }
 
-export async function listItemsDB(opt: ItemSearchOption): Promise<Item[]> {
+export async function listItemsDB(
+  opt: ItemSearchOption,
+): Promise<{ list: Item[]; totalCount: number }> {
   try {
-    const res = await prisma.item.findMany(
-      {
-        where: { deletedAt: null }, // TODO : 검색 조건 추가
+    const where = {
+      deletedAt: null,
+    };
+
+    const [totalCount, items] = await prisma.$transaction([
+      prisma.item.count({
+        where,
+      }),
+      prisma.item.findMany({
+        where,
         take: opt.unit,
         skip: (opt.page - 1) * opt.unit,
         orderBy: { createdAt: "desc" },
         include: {
-          images: true
-        }
-      }
-    );
+          images: true,
+        },
+      }),
+    ]);
 
-    if (!res) return [];
-
-    return itemListFromDB(res);
+    return {
+      list: items ? itemListFromDB(items) : [],
+      totalCount,
+    };
   } catch (e: any) {
     throw new Error(e.message);
   }
@@ -72,7 +88,10 @@ export async function updateItemDB(item: Item): Promise<Item> {
       // 이미지 빼놓기
       const images = item.images;
       // 물건 수정
-      const itemRes = await tx.item.update({ where: { id: item.id }, data: dataFromItem(item) });
+      const itemRes = await tx.item.update({
+        where: { id: item.id },
+        data: dataFromItem(item),
+      });
       // 수정된 아이템 가져오기
       item = itemFromDB(itemRes);
       // 기존 이미지 전부 삭제하기

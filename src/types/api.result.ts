@@ -4,27 +4,27 @@
 export enum ResultType {
   RESULT_NONE = "RESULT_NONE",
   RESULT_SINGLE = "RESULT_SINGLE",
-  RESULT_LIST = "RESULT_LIST"
+  RESULT_LIST = "RESULT_LIST",
 }
 
 /**
  * 공통 결과
  */
-export type CommonResult = {
+export type CommonResult<T> = {
   message: string;
   resultType: ResultType;
-  data: any | ListResult | null;
-}
+  data: T | ListResult<T> | null;
+};
 
 /**
  * 결과 없음
  * @param message
  */
-export function makeNoneResult(message: string = ""): CommonResult {
+export function makeNoneResult<T>(message: string = ""): CommonResult<T> {
   return {
     message: message,
     resultType: ResultType.RESULT_NONE,
-    data: null
+    data: null,
   };
 }
 
@@ -32,11 +32,11 @@ export function makeNoneResult(message: string = ""): CommonResult {
  * 에러 결과
  * @param message
  */
-export function makeErrorResult(message: string): CommonResult {
+export function makeErrorResult<T>(message: string): CommonResult<T> {
   return {
     message: message,
     resultType: ResultType.RESULT_NONE,
-    data: null
+    data: null,
   };
 }
 
@@ -45,21 +45,24 @@ export function makeErrorResult(message: string): CommonResult {
  * @param data
  * @param message
  */
-export function makeSingleResult(data: any, message: string = ""): CommonResult {
+export function makeSingleResult<T>(
+  data: any,
+  message: string = "",
+): CommonResult<T> {
   return {
     message: message,
     resultType: ResultType.RESULT_SINGLE,
-    data: data
+    data: data,
   };
 }
 
 /**
  * 리스트 조회 결과
  */
-export type ListResult = {
-  list: any[];
+export type ListResult<T> = {
+  list: T[];
   totalCount: number;
-}
+};
 
 /**
  * 리스트 조회 결과 만들기
@@ -68,10 +71,14 @@ export type ListResult = {
  * @param totalCount
  * @returns ListResult
  */
-export function makeListResult(list: any[], totalCount: number, message: string = ""): CommonResult {
+export function makeListResult<T>(
+  list: T[],
+  totalCount: number,
+  message: string = "",
+): CommonResult<T> {
   return {
     message: message,
     resultType: ResultType.RESULT_LIST,
-    data: { list, totalCount } as ListResult
+    data: { list, totalCount } as ListResult<T>,
   };
 }

@@ -1,11 +1,19 @@
 import type { Item, ItemSearchOption } from "@/types";
-import { getItemDB, listItemsDB, createItemDB, updateItemDB, deleteItemsDB } from "@/database/item";
+import {
+  getItemDB,
+  listItemsDB,
+  createItemDB,
+  updateItemDB,
+  deleteItemsDB,
+} from "@/database/item";
 
 export async function getItem(id: number): Promise<Item | null> {
   return await getItemDB(id);
 }
 
-export async function listItems(opt: ItemSearchOption): Promise<Item[]> {
+export async function listItems(
+  opt: ItemSearchOption,
+): Promise<{ list: Item[]; totalCount: number }> {
   return await listItemsDB(opt);
 }
 

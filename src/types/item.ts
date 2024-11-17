@@ -4,7 +4,7 @@ import type {
   ItemImage,
   StringSearchOption,
   NumberRangeSearchOption,
-  NumberExactSearchOption
+  NumberExactSearchOption,
 } from "@/types";
 import { bindFromArray, type ListOption } from "@/types";
 
@@ -15,9 +15,9 @@ import { bindFromArray, type ListOption } from "@/types";
  * @property {NumberExactSearchOption | NumberRangeSearchOption | null} stockCount - 재고 수량 검색 옵션
  */
 export type ItemSearchOption = {
-  name: StringSearchOption | null // 물건명 검색 옵션
-  description: StringSearchOption | null // 물건 설명 검색 옵션
-  stockCount: NumberExactSearchOption | NumberRangeSearchOption | null // 재고 수량 검색 옵션
+  name: StringSearchOption | null; // 물건명 검색 옵션
+  description: StringSearchOption | null; // 물건 설명 검색 옵션
+  stockCount: NumberExactSearchOption | NumberRangeSearchOption | null; // 재고 수량 검색 옵션
 } & ListOption;
 
 /**
@@ -29,7 +29,7 @@ export function initItemSearchOption(): ItemSearchOption {
     description: null,
     stockCount: null,
     page: 1,
-    unit: 10
+    unit: 10,
   };
 }
 
@@ -57,7 +57,7 @@ export type Item = {
   stockCount: number; // 재고 수량 0 이면 무제한 -1이면 품절, 1이상이면 해당 수량만큼 재고
 
   images: ItemImage[]; // 물건 이미지
-}
+};
 
 /**
  * DB 물건 생성, 수정을 위한 데이터 만들기
@@ -68,7 +68,7 @@ export function dataFromItem(item: Item): any {
   return {
     name: item.name.trim(),
     description: item.description.trim(),
-    stockCount: item.stockCount
+    stockCount: item.stockCount,
   };
 }
 
@@ -85,7 +85,7 @@ export function initItem(): Item {
     name: "",
     description: "",
     stockCount: 0,
-    images: []
+    images: [],
   };
 }
 
@@ -103,7 +103,7 @@ export function itemFromDB(item: ItemDB): Item {
     description: item.description,
     stockCount: item.stockCount,
     // @ts-ignore
-    images: bindFromArray<ItemImage>(item.images)
+    images: bindFromArray<ItemImage>(item.images),
   } as Item;
 }
 
